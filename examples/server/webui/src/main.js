@@ -336,6 +336,9 @@ const mainApp = createApp({
       configDefault: {...CONFIG_DEFAULT},
       configInfo: {...CONFIG_INFO},
       isDev,
+      uploadedFile: null,
+      MAX_FILE_SIZE: 10 * 1024 * 1024 * 1024, // 10GB in bytes
+      uploadProgress: null,  // 上传进度，null 表示没有上传进行中
     }
   },
   computed: {},
@@ -584,7 +587,81 @@ const mainApp = createApp({
         StorageUtils.appendMsg(demoConv.id, msg);
       }
       this.fetchConversation();
-    }
+    },
+
+    triggerFileUpload() {
+      document.getElementById('file-upload').click();
+    },
+
+    async handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // 检查文件大小
+      if (file.size > this.MAX_FILE_SIZE) {
+        alert('File size exceeds 10GB limit');
+        event.target.value = '';
+        return;
+      }
+
+      // 检查文件类型
+      const validTypes = ['.txt', '.log'];
+      const fileExt = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+      if (!validTypes.includes(fileExt)) {
+        alert('Only .txt and .log files are allowed');
+        event.target.value = '';
+        return;
+      }
+
+      try {
+        this.uploadProgress = 0;
+        
+        const reader = new FileReader();
+        
+        await new Promise((resolve, reject) => {
+          reader.onloadstart = () => {
+            this.uploadProgress = 0;
+          };
+          
+          reader.onprogress = (event) => {
+            if (event.lengthComputable) {
+              // 计算精确的进度百分比
+              this.uploadProgress = Math.round((event.loaded / event.total) * 100);
+            }
+          };
+          
+          reader.onload = () => {
+            this.uploadProgress = 100;
+            resolve(reader.result);
+          };
+          
+          reader.onerror = () => {
+            reject(new Error('File reading failed'));
+          };
+          
+          // 开始读取文件
+          reader.readAsText(file);
+        });
+
+        // 文件读取成功后
+        this.uploadedFile = file;
+        // 短暂延迟后清除进度条，让用户能看到100%的状态
+        setTimeout(() => {
+          this.uploadProgress = null;
+        }, 500);
+
+      } catch (error) {
+        alert('File reading failed: ' + error.message);
+        this.uploadProgress = null;
+      }
+      
+      event.target.value = '';
+    },
+
+    removeFile() {
+      this.uploadedFile = null;
+      this.uploadProgress = null;
+    },
   },
 });
 mainApp.config.errorHandler = alert;
