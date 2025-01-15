@@ -1,0 +1,11 @@
+@use 'variables' as *;
+
+// 全局样式
+:root {
+  --primary-color: #{$primary-color};
+  --secondary-color: #{$secondary-color};
+  --error-color: #{$error-color};
+  --warning-color: #{$warning-color};
+  --success-color: #{$success-color};
+  --info-color: #{$info-color};
+} 
