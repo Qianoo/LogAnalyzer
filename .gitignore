@@ -32,3 +32,5 @@
 *.app
 
 build/
+common/build-info.cpp
+models/
