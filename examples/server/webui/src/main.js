@@ -662,6 +662,19 @@ const mainApp = createApp({
       this.uploadedFile = null;
       this.uploadProgress = null;
     },
+
+    openLogViewer() {
+      if (!this.uploadedFile) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const logContent = event.target.result;
+        const logWindow = window.open('logViewer.html', '_blank');
+        logWindow.onload = () => {
+          logWindow.postMessage(logContent, '*');
+        };
+      };
+      reader.readAsText(this.uploadedFile);
+    },
   },
 });
 mainApp.config.errorHandler = alert;

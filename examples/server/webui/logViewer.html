@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzer Result</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        #container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #keyword-list {
+            width: 20%;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .right-panel {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #log-display {
+            height: 70%;
+            overflow-y: auto;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        #analysis-result {
+            height: 30%;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .keyword {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .keyword:hover {
+            background-color: #e9ecef;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 0;
+        }
+
+        .line-number {
+            color: #6c757d;
+            margin-right: 10px;
+            user-select: none;
+        }
+
+        .keyword-block {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .keyword-tag:hover {
+            background-color: #cce5ff;
+        }
+
+        .keyword-tag .line-info {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 4px;
+        }
+
+        .line-highlight {
+            background-color: #fff3cd;
+            animation: highlight 2s;
+        }
+
+        @keyframes highlight {
+            from {
+                background-color: #ffeeba;
+            }
+
+            to {
+                background-color: #fff3cd;
+            }
+        }
+
+        .block-header {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #filter-container {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag {
+            padding: 4px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tag.active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .filter-tag.inactive {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Analyzer Result</h1>
+    <div id="filter-container"></div>
+    <div id="container">
+        <div id="keyword-list"></div>
+        <div class="right-panel">
+            <div id="log-display"></div>
+            <div id="analysis-result">Analysis results will be displayed here.</div>
+        </div>
+    </div>
+    <script type="module">
+        import { parseLogFile } from './src/logParser.js';
+
+        window.addEventListener('message', (event) => {
+            const logContent = event.data;
+            const keywordBlocks = parseLogFile(logContent);
+            const lines = logContent.split('\n');
+
+            const filterContainer = document.getElementById('filter-container');
+            const keywordListElem = document.getElementById('keyword-list');
+            const logDisplayElem = document.getElementById('log-display');
+
+            // 收集所有唯一的关键字
+            const allKeywords = new Set();
+            keywordBlocks.forEach(block => {
+                block.keywords.forEach(keyword => allKeywords.add(keyword));
+            });
+
+            // 存储关键字过滤状态
+            const keywordFilters = new Map();
+            allKeywords.forEach(keyword => keywordFilters.set(keyword, true));
+
+            function displayBlockContent(block) {
+                logDisplayElem.innerHTML = '';
+
+                const headerElem = document.createElement('div');
+                headerElem.className = 'block-header';
+                const lineCount = block.endLine - block.startLine + 1;
+                const truncatedMessage = lineCount >= 500 ? ' (Truncated to 500 lines)' : '';
+                headerElem.textContent = `Log Block (Lines ${block.startLine + 1} - ${block.endLine + 1})${truncatedMessage}`;
+                logDisplayElem.appendChild(headerElem);
+
+                const blockLines = lines.slice(block.startLine, block.endLine + 1);
+                blockLines.forEach((line, index) => {
+                    const lineElem = document.createElement('div');
+                    const actualLineNum = block.startLine + index;
+                    lineElem.id = `line-${actualLineNum}`;
+                    lineElem.innerHTML = `<span class="line-number">${actualLineNum + 1}</span>${line}`;
+
+                    if (block.keywords.some(keyword =>
+                        keywordFilters.get(keyword) && line.includes(keyword))) {
+                        lineElem.classList.add('highlight');
+                    }
+                    logDisplayElem.appendChild(lineElem);
+                });
+
+                if (lineCount >= 500) {
+                    const truncateNote = document.createElement('div');
+                    truncateNote.className = 'truncate-note';
+                    truncateNote.style.color = '#666';
+                    truncateNote.style.padding = '10px';
+                    truncateNote.style.fontStyle = 'italic';
+                    truncateNote.textContent = 'Note: Log block has been truncated to 500 lines for better performance.';
+                    logDisplayElem.appendChild(truncateNote);
+                }
+            }
+
+            // 创建过滤器标签
+            allKeywords.forEach(keyword => {
+                const filterTag = document.createElement('span');
+                filterTag.className = 'filter-tag active';
+                filterTag.textContent = keyword;
+                filterTag.onclick = () => {
+                    const isActive = keywordFilters.get(keyword);
+                    keywordFilters.set(keyword, !isActive);
+                    filterTag.className = `filter-tag ${!isActive ? 'active' : 'inactive'}`;
+                    updateDisplay();
+                };
+                filterContainer.appendChild(filterTag);
+            });
+
+            function updateDisplay() {
+                keywordListElem.innerHTML = '';
+
+                // 过滤并显示关键字块
+                const visibleBlocks = keywordBlocks.filter(block => {
+                    return block.keywords.some(keyword => keywordFilters.get(keyword));
+                });
+
+                visibleBlocks.forEach((block, blockIndex) => {
+                    const blockElem = document.createElement('div');
+                    blockElem.className = 'keyword-block';
+
+                    const tagsContainer = document.createElement('div');
+                    tagsContainer.className = 'keyword-tags';
+
+                    // 只显示活跃的关键字标签
+                    const activeKeywords = block.keywords.filter(keyword =>
+                        keywordFilters.get(keyword));
+
+                    activeKeywords.forEach(keyword => {
+                        const tag = document.createElement('span');
+                        tag.className = 'keyword-tag';
+
+                        const keywordLines = [];
+                        lines.slice(block.startLine, block.endLine + 1).forEach((line, idx) => {
+                            if (line.includes(keyword)) {
+                                keywordLines.push(block.startLine + idx);
+                            }
+                        });
+
+                        tag.innerHTML = `${keyword} <span class="line-info">(${keywordLines.length})</span>`;
+                        tag.onclick = () => {
+                            displayBlockContent(block);
+                            document.querySelectorAll('.line-highlight').forEach(el => {
+                                el.classList.remove('line-highlight');
+                            });
+                            setTimeout(() => {
+                                if (keywordLines.length > 0) {
+                                    const targetLine = document.getElementById(`line-${keywordLines[0]}`);
+                                    if (targetLine) {
+                                        targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        targetLine.classList.add('line-highlight');
+                                    }
+                                }
+                            }, 100);
+                        };
+                        tagsContainer.appendChild(tag);
+                    });
+
+                    blockElem.appendChild(tagsContainer);
+                    keywordListElem.appendChild(blockElem);
+                });
+
+                // 如果有显示的块，显示第一个块的内容
+                if (visibleBlocks.length > 0) {
+                    const firstBlock = keywordListElem.querySelector('.keyword-block');
+                    if (firstBlock) {
+                        firstBlock.querySelector('.keyword-tag').click();
+                    }
+                } else {
+                    logDisplayElem.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>';
+                }
+            }
+
+            // 初始显示
+            updateDisplay();
+        });
+    </script>
+</body>
+
+</html>

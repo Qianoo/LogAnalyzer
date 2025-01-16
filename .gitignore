@@ -34,3 +34,5 @@
 build/
 common/build-info.cpp
 models/
+examples/server/webui/node_modules
+examples/server/webui/node_modules/.vite

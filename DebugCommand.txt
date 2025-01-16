@@ -1,0 +1,8 @@
+[Build]
+cmake -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
+cmake --build build --config Release -j6
+
+[npm run dev error]
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
