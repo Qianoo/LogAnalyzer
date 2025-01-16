@@ -17,6 +17,7 @@ set(TARGET_SRCS
 set(PUBLIC_ASSETS
     index.html.gz
     loading.html
+    logViewer.html.gz
 )
 
 foreach(asset ${PUBLIC_ASSETS})

@@ -1,5 +1,8 @@
 export function parseLogFile(logContent) {
-  const MAX_BLOCK_LINES = 500; // 设置最大行数限制
+  const MAX_BLOCK_LINES = 300;      // 设置最大行数限制
+  const LINES_BEFORE_FIRST = 100;    // 第一个关键字前显示的行数
+  const LINES_AFTER_LAST = 50;     // 最后一个关键字后显示的行数
+  
   const keywords = [
     // C++ 常见错误日志关键字
     'Segmentation fault', 'core dumped', 'Bus error', 'undefined reference',
@@ -31,7 +34,7 @@ export function parseLogFile(logContent) {
   lines.forEach((line, index) => {
     const foundKeywords = keywords.filter(keyword => line.includes(keyword));
     if (foundKeywords.length > 0) {
-      if (!currentBlock || index - currentBlock.endLine > 50) {
+      if (!currentBlock || index - currentBlock.endLine > LINES_AFTER_LAST) {
         if (currentBlock) {
           // 限制日志块的行数
           const blockLength = currentBlock.endLine - currentBlock.startLine;
@@ -42,15 +45,16 @@ export function parseLogFile(logContent) {
         }
         currentBlock = {
           keywords: foundKeywords,
-          startLine: Math.max(0, index - 100),
-          endLine: index + 100,
+          startLine: Math.max(0, index - LINES_BEFORE_FIRST),
+          endLine: Math.min(lines.length, index + LINES_AFTER_LAST),
           lines: []
         };
       } else {
         currentBlock.keywords.push(...foundKeywords);
-        // 检查是否超过最大行数限制
-        if (index + 100 - currentBlock.startLine <= MAX_BLOCK_LINES) {
-          currentBlock.endLine = index + 100;
+        // 更新结束行，但确保不超过最大行数限制
+        const newEndLine = Math.min(lines.length, index + LINES_AFTER_LAST);
+        if (newEndLine - currentBlock.startLine <= MAX_BLOCK_LINES) {
+          currentBlock.endLine = newEndLine;
         }
       }
     }

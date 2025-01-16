@@ -1,10 +1,9 @@
-
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import path from 'path';
 import fs from 'fs';
 import zlib from 'zlib';
 
-const MAX_BUNDLE_SIZE = 1.5 * 1024 * 1024; // only increase when absolutely necessary
+const MAX_BUNDLE_SIZE = 1.5 * 1024 * 1024;
 
 const GUIDE_FOR_FRONTEND = `
 <!--
@@ -15,45 +14,60 @@ const GUIDE_FOR_FRONTEND = `
 -->
 `.trim();
 
-const BUILD_PLUGINS = [
-  viteSingleFile(),
-  (function llamaCppPlugin() {
-    let config;
-    return {
-      name: 'llamacpp:build',
-      apply: 'build',
-      async configResolved(_config) {
-        config = _config;
-      },
-      writeBundle() {
-        const outputIndexHtml = path.join(config.build.outDir, 'index.html');
-        const content = GUIDE_FOR_FRONTEND + '\n' + fs.readFileSync(outputIndexHtml, 'utf-8');
-        const compressed = zlib.gzipSync(Buffer.from(content, 'utf-8'), { level: 9 });
+// 创建单文件构建插件的工厂函数
+function createSingleFilePlugin(filename) {
+  let config;  // 在闭包中存储配置
+  return {
+    name: `llamacpp:${filename}`,
+    apply: 'build',
+    configResolved(resolvedConfig) {
+      config = resolvedConfig;  // 使用闭包变量而不是 this
+    },
+    writeBundle(options, bundle) {
+      const outputFile = path.join(config.build.outDir, filename);
+      if (!fs.existsSync(outputFile)) return;
 
-        // because gzip header contains machine-specific info, we must remove these data from the header
-        // timestamp
-        compressed[0x4] = 0;
-        compressed[0x5] = 0;
-        compressed[0x6] = 0;
-        compressed[0x7] = 0;
-        // OS
-        compressed[0x9] = 0;
+      const content = GUIDE_FOR_FRONTEND + '\n' + fs.readFileSync(outputFile, 'utf-8');
+      const compressed = zlib.gzipSync(Buffer.from(content, 'utf-8'), { level: 9 });
+      
+      // 清理 gzip 头部
+      const buffer = Buffer.from(compressed);
+      buffer[0x4] = 0; buffer[0x5] = 0; buffer[0x6] = 0; buffer[0x7] = 0; // timestamp
+      buffer[0x9] = 0; // OS
 
-        if (compressed.byteLength > MAX_BUNDLE_SIZE) {
-          throw new Error(
-            `Bundle size is too large (${Math.ceil(compressed.byteLength / 1024)} KB).\n` +
-            `Please reduce the size of the frontend or increase MAX_BUNDLE_SIZE in vite.config.js.\n`,
-          );
-        }
-
-        const targetOutputFile = path.join(config.build.outDir, '../../public/index.html.gz');
-        fs.writeFileSync(targetOutputFile, compressed);
+      // 检查大小
+      if (buffer.byteLength > MAX_BUNDLE_SIZE) {
+        throw new Error(
+          `${filename} bundle size is too large (${Math.ceil(buffer.byteLength / 1024)} KB).\n` +
+          `Please reduce the size of the frontend or increase MAX_BUNDLE_SIZE in vite.config.js.\n`
+        );
       }
-    }
-  })(),
-];
 
-/** @type {import('vite').UserConfig} */
+      // 写入文件
+      const publicDir = path.join(config.build.outDir, '../../public');
+      fs.writeFileSync(path.join(publicDir, `${filename}.gz`), buffer);
+    }
+  };
+}
+
+// 根据命令行参数选择要构建的文件
+const buildTarget = process.env.BUILD_TARGET || 'index';
+const buildConfig = {
+  index: {
+    input: 'index.html',
+    plugins: [viteSingleFile(), createSingleFilePlugin('index.html')]
+  },
+  logViewer: {
+    input: 'logViewer.html',
+    plugins: [viteSingleFile(), createSingleFilePlugin('logViewer.html')]
+  }
+}[buildTarget];
+
 export default {
-  plugins: process.env.ANALYZE ? [] : BUILD_PLUGINS,
+  build: {
+    rollupOptions: {
+      input: buildConfig.input
+    }
+  },
+  plugins: process.env.ANALYZE ? [] : buildConfig.plugins
 };

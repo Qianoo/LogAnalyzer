@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzer Result</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
+        #container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #keyword-list {
+            width: 20%;
+            background-color: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .right-panel {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #log-display {
+            height: 70%;
+            overflow-y: auto;
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        #analysis-result {
+            height: 30%;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .keyword {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .keyword:hover {
+            background-color: #e9ecef;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 0;
+        }
+
+        .line-number {
+            color: #6c757d;
+            margin-right: 10px;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                    user-select: none;
+        }
+
+        .keyword-block {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .keyword-tag:hover {
+            background-color: #cce5ff;
+        }
+
+        .keyword-tag .line-info {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 4px;
+        }
+
+        .line-highlight {
+            background-color: #fff3cd;
+            animation: highlight 2s;
+        }
+
+        @keyframes highlight {
+            from {
+                background-color: #ffeeba;
+            }
+
+            to {
+                background-color: #fff3cd;
+            }
+        }
+
+        .block-header {
+            padding: 5px 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #filter-container {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-tag {
+            padding: 4px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-tag.active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .filter-tag.inactive {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+    </style>
+  <script type="module" crossorigin>(function(){const u=document.createElement("link").relList;if(u&&u.supports&&u.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))L(o);new MutationObserver(o=>{for(const i of o)if(i.type==="childList")for(const r of i.addedNodes)r.tagName==="LINK"&&r.rel==="modulepreload"&&L(r)}).observe(document,{childList:!0,subtree:!0});function g(o){const i={};return o.integrity&&(i.integrity=o.integrity),o.referrerPolicy&&(i.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?i.credentials="include":o.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function L(o){if(o.ep)return;o.ep=!0;const i=g(o);fetch(o.href,i)}})();function k(y){const o=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","Process terminated","BinderProxy","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","soft lockup","hard lockup","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Warning","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],i=y.split(`
+`),r=[];let t=null;return i.forEach((s,m)=>{const p=o.filter(e=>s.includes(e));if(p.length>0)if(!t||m-t.endLine>50)t&&(t.endLine-t.startLine>300&&(t.endLine=t.startLine+300),r.push(t)),t={keywords:p,startLine:Math.max(0,m-10),endLine:Math.min(i.length,m+50),lines:[]};else{t.keywords.push(...p);const e=Math.min(i.length,m+50);e-t.startLine<=300&&(t.endLine=e)}t&&t.lines.push(s)}),t&&(t.endLine-t.startLine>300&&(t.endLine=t.startLine+300),r.push(t)),r}window.addEventListener("message",y=>{const u=y.data,g=k(u),L=u.split(`
+`),o=document.getElementById("filter-container"),i=document.getElementById("keyword-list"),r=document.getElementById("log-display"),t=new Set;g.forEach(e=>{e.keywords.forEach(n=>t.add(n))});const s=new Map;t.forEach(e=>s.set(e,!0));function m(e){r.innerHTML="";const n=document.createElement("div");n.className="block-header";const d=e.endLine-e.startLine+1,E=d>=500?" (Truncated to 500 lines)":"";if(n.textContent=`Log Block (Lines ${e.startLine+1} - ${e.endLine+1})${E}`,r.appendChild(n),L.slice(e.startLine,e.endLine+1).forEach((c,h)=>{const a=document.createElement("div"),f=e.startLine+h;a.id=`line-${f}`,a.innerHTML=`<span class="line-number">${f+1}</span>${c}`,e.keywords.some(l=>s.get(l)&&c.includes(l))&&a.classList.add("highlight"),r.appendChild(a)}),d>=500){const c=document.createElement("div");c.className="truncate-note",c.style.color="#666",c.style.padding="10px",c.style.fontStyle="italic",c.textContent="Note: Log block has been truncated to 500 lines for better performance.",r.appendChild(c)}}t.forEach(e=>{const n=document.createElement("span");n.className="filter-tag active",n.textContent=e,n.onclick=()=>{const d=s.get(e);s.set(e,!d),n.className=`filter-tag ${d?"inactive":"active"}`,p()},o.appendChild(n)});function p(){i.innerHTML="";const e=g.filter(n=>n.keywords.some(d=>s.get(d)));if(e.forEach((n,d)=>{const E=document.createElement("div");E.className="keyword-block";const N=document.createElement("div");N.className="keyword-tags",n.keywords.filter(h=>s.get(h)).forEach(h=>{const a=document.createElement("span");a.className="keyword-tag";const f=[];L.slice(n.startLine,n.endLine+1).forEach((l,S)=>{l.includes(h)&&f.push(n.startLine+S)}),a.innerHTML=`${h} <span class="line-info">(${f.length})</span>`,a.onclick=()=>{m(n),document.querySelectorAll(".line-highlight").forEach(l=>{l.classList.remove("line-highlight")}),setTimeout(()=>{if(f.length>0){const l=document.getElementById(`line-${f[0]}`);l&&(l.scrollIntoView({behavior:"smooth",block:"center"}),l.classList.add("line-highlight"))}},100)},N.appendChild(a)}),E.appendChild(N),i.appendChild(E)}),e.length>0){const n=i.querySelector(".keyword-block");n&&n.querySelector(".keyword-tag").click()}else r.innerHTML='<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>'}p()});</script>
+</head>
+
+<body>
+    <h1>Analyzer Result</h1>
+    <div id="filter-container"></div>
+    <div id="container">
+        <div id="keyword-list"></div>
+        <div class="right-panel">
+            <div id="log-display"></div>
+            <div id="analysis-result">Analysis results will be displayed here.</div>
+        </div>
+    </div>
+</body>
+
+</html>
