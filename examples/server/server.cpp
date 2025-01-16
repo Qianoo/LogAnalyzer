@@ -2511,7 +2511,7 @@ struct server_context
             {
                 error_handler(result->to_json());
                 cancel_tasks(id_tasks);
-                return;
+                break;
             }
 
             GGML_ASSERT(
@@ -4452,7 +4452,8 @@ int main(int argc, char **argv)
         else
         {
             // using embedded static index.html
-            svr->Get("/", [](const httplib::Request & req, httplib::Response & res) {
+            svr->Get("/", [](const httplib::Request &req, httplib::Response &res)
+                     {
                 if (req.get_header_value("Accept-Encoding").find("gzip") == std::string::npos) {
                     res.set_content("Error: gzip is not supported by this browser", "text/plain");
                 } else {
@@ -4462,7 +4463,8 @@ int main(int argc, char **argv)
                 return false; });
 
             // 添加 logViewer.html 路由
-            svr->Get("/logViewer.html", [](const httplib::Request & req, httplib::Response & res) {
+            svr->Get("/logViewer.html", [](const httplib::Request &req, httplib::Response &res)
+                     {
                 if (req.get_header_value("Accept-Encoding").find("gzip") == std::string::npos) {
                     res.set_content("Error: gzip is not supported by this browser", "text/plain");
                 } else {

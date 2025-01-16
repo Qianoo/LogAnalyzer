@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyzer Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -16,9 +17,10 @@
 
         h1 {
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             margin: 0;
             background-color: #f5f5f5;
+            font-size: 1.5rem;
         }
 
         #container {
@@ -52,6 +54,9 @@
             height: 30%;
             overflow-y: auto;
             padding: 15px;
+            background-color: #ffffff;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .keyword {
@@ -82,8 +87,8 @@
         }
 
         .keyword-block {
-            margin: 15px 0;
-            padding: 10px;
+            margin: 8px 0;
+            padding: 6px;
             background-color: #f8f9fa;
             border-radius: 4px;
         }
@@ -95,14 +100,13 @@
         }
 
         .keyword-tag {
-            display: inline-block;
-            padding: 4px 8px;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            margin: 2px;
+            border-radius: 3px;
             background-color: #e7f3ff;
             border: 1px solid #b3d7ff;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.2s;
         }
 
         .keyword-tag:hover {
@@ -139,19 +143,21 @@
         }
 
         #filter-container {
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            padding: 8px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 4px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
         }
 
         .filter-tag {
-            padding: 4px 12px;
-            border-radius: 16px;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s;
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
         }
 
         .filter-tag.active {
@@ -161,12 +167,86 @@
 
         .filter-tag.inactive {
             background-color: #e9ecef;
-            color: #6c757d;
+            color: #666;
+        }
+
+        .markdown {
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .markdown h1 {
+            font-size: 1.4em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown h2 {
+            font-size: 1.2em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown h3 {
+            font-size: 1.1em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown ul,
+        .markdown ol {
+            padding-left: 1.5em;
+            margin-bottom: 0.8em;
+        }
+
+        .markdown li {
+            margin-bottom: 0.3em;
+        }
+
+        .markdown code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .markdown pre {
+            background-color: #f5f5f5;
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .markdown blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #666;
+        }
+
+        .markdown p {
+            margin-bottom: 0.8em;
         }
     </style>
-  <script type="module" crossorigin>(function(){const u=document.createElement("link").relList;if(u&&u.supports&&u.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))L(o);new MutationObserver(o=>{for(const i of o)if(i.type==="childList")for(const r of i.addedNodes)r.tagName==="LINK"&&r.rel==="modulepreload"&&L(r)}).observe(document,{childList:!0,subtree:!0});function g(o){const i={};return o.integrity&&(i.integrity=o.integrity),o.referrerPolicy&&(i.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?i.credentials="include":o.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function L(o){if(o.ep)return;o.ep=!0;const i=g(o);fetch(o.href,i)}})();function k(y){const o=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","Process terminated","BinderProxy","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","soft lockup","hard lockup","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Warning","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],i=y.split(`
-`),r=[];let t=null;return i.forEach((s,m)=>{const p=o.filter(e=>s.includes(e));if(p.length>0)if(!t||m-t.endLine>50)t&&(t.endLine-t.startLine>300&&(t.endLine=t.startLine+300),r.push(t)),t={keywords:p,startLine:Math.max(0,m-10),endLine:Math.min(i.length,m+50),lines:[]};else{t.keywords.push(...p);const e=Math.min(i.length,m+50);e-t.startLine<=300&&(t.endLine=e)}t&&t.lines.push(s)}),t&&(t.endLine-t.startLine>300&&(t.endLine=t.startLine+300),r.push(t)),r}window.addEventListener("message",y=>{const u=y.data,g=k(u),L=u.split(`
-`),o=document.getElementById("filter-container"),i=document.getElementById("keyword-list"),r=document.getElementById("log-display"),t=new Set;g.forEach(e=>{e.keywords.forEach(n=>t.add(n))});const s=new Map;t.forEach(e=>s.set(e,!0));function m(e){r.innerHTML="";const n=document.createElement("div");n.className="block-header";const d=e.endLine-e.startLine+1,E=d>=500?" (Truncated to 500 lines)":"";if(n.textContent=`Log Block (Lines ${e.startLine+1} - ${e.endLine+1})${E}`,r.appendChild(n),L.slice(e.startLine,e.endLine+1).forEach((c,h)=>{const a=document.createElement("div"),f=e.startLine+h;a.id=`line-${f}`,a.innerHTML=`<span class="line-number">${f+1}</span>${c}`,e.keywords.some(l=>s.get(l)&&c.includes(l))&&a.classList.add("highlight"),r.appendChild(a)}),d>=500){const c=document.createElement("div");c.className="truncate-note",c.style.color="#666",c.style.padding="10px",c.style.fontStyle="italic",c.textContent="Note: Log block has been truncated to 500 lines for better performance.",r.appendChild(c)}}t.forEach(e=>{const n=document.createElement("span");n.className="filter-tag active",n.textContent=e,n.onclick=()=>{const d=s.get(e);s.set(e,!d),n.className=`filter-tag ${d?"inactive":"active"}`,p()},o.appendChild(n)});function p(){i.innerHTML="";const e=g.filter(n=>n.keywords.some(d=>s.get(d)));if(e.forEach((n,d)=>{const E=document.createElement("div");E.className="keyword-block";const N=document.createElement("div");N.className="keyword-tags",n.keywords.filter(h=>s.get(h)).forEach(h=>{const a=document.createElement("span");a.className="keyword-tag";const f=[];L.slice(n.startLine,n.endLine+1).forEach((l,S)=>{l.includes(h)&&f.push(n.startLine+S)}),a.innerHTML=`${h} <span class="line-info">(${f.length})</span>`,a.onclick=()=>{m(n),document.querySelectorAll(".line-highlight").forEach(l=>{l.classList.remove("line-highlight")}),setTimeout(()=>{if(f.length>0){const l=document.getElementById(`line-${f[0]}`);l&&(l.scrollIntoView({behavior:"smooth",block:"center"}),l.classList.add("line-highlight"))}},100)},N.appendChild(a)}),E.appendChild(N),i.appendChild(E)}),e.length>0){const n=i.querySelector(".keyword-block");n&&n.querySelector(".keyword-tag").click()}else r.innerHTML='<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>'}p()});</script>
+  <script type="module" crossorigin>(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const e of document.querySelectorAll('link[rel="modulepreload"]'))i(e);new MutationObserver(e=>{for(const t of e)if(t.type==="childList")for(const l of t.addedNodes)l.tagName==="LINK"&&l.rel==="modulepreload"&&i(l)}).observe(document,{childList:!0,subtree:!0});function r(e){const t={};return e.integrity&&(t.integrity=e.integrity),e.referrerPolicy&&(t.referrerPolicy=e.referrerPolicy),e.crossOrigin==="use-credentials"?t.credentials="include":e.crossOrigin==="anonymous"?t.credentials="omit":t.credentials="same-origin",t}function i(e){if(e.ep)return;e.ep=!0;const t=r(e);fetch(e.href,t)}})();function S(s){const e=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","soft lockup","hard lockup","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],t=s.split(`
+`),l=[];let o=null;return t.forEach((c,a)=>{const f=e.filter(m=>c.includes(m));if(f.length>0)if(!o||a-o.endLine>10)o&&(o.endLine-o.startLine>300&&(o.endLine=o.startLine+300),l.push(o)),o={keywords:f,startLine:Math.max(0,a-20),endLine:Math.min(t.length,a+10),lines:[]};else{o.keywords.push(...f);const m=Math.min(t.length,a+10);m-o.startLine<=300&&(o.endLine=m)}o&&o.lines.push(c)}),o&&(o.endLine-o.startLine>300&&(o.endLine=o.startLine+300),l.push(o)),l}class T extends TransformStream{constructor(){let n="";super({transform(r,i){n+=r;const e=n.split(/\r\n|\n|\r/);n=e.pop()||"";for(const t of e)i.enqueue(t)},flush(r){n&&r.enqueue(n)}})}}async function*k(s,n){const r=await fetch(s,n);if(!r.ok)throw new Error(`HTTP error! status: ${r.status}`);const i=r.body.pipeThrough(new TextDecoderStream).pipeThrough(new T);for await(const e of i)if(e.startsWith("data: ")){const t=e.slice(5);if(t==="[DONE]")return;try{yield JSON.parse(t)}catch(l){console.error("Error parsing SSE data:",l)}}}const C=window.markdownit({html:!0,linkify:!0,typographer:!0,breaks:!0});let u=null,h=[],g=[],d=new Map;const y=document.getElementById("filter-container"),L=document.getElementById("keyword-list"),p=document.getElementById("log-display");function v(s){p.innerHTML="";const n=document.createElement("div");n.className="block-header";const r=s.endLine-s.startLine+1,i=r>=500?" (Truncated to 500 lines)":"";if(n.textContent=`Log Block (Lines ${s.startLine+1} - ${s.endLine+1})${i}`,p.appendChild(n),g.slice(s.startLine,s.endLine+1).forEach((t,l)=>{const o=document.createElement("div"),c=s.startLine+l;o.id=`line-${c}`,o.innerHTML=`<span class="line-number">${c+1}</span>${t}`,s.keywords.some(a=>d.get(a)&&t.includes(a))&&o.classList.add("highlight"),p.appendChild(o)}),r>=500){const t=document.createElement("div");t.className="truncate-note",t.style.color="#666",t.style.padding="10px",t.style.fontStyle="italic",t.textContent="Note: Log block has been truncated to 500 lines for better performance.",p.appendChild(t)}}function E(){w(),L.innerHTML="";const s=h.filter(n=>n.keywords.some(r=>d.get(r)));if(s.forEach((n,r)=>{const i=document.createElement("div");i.className="keyword-block";const e=document.createElement("div");e.className="keyword-tags",n.keywords.filter(l=>d.get(l)).forEach(l=>{const o=document.createElement("span");o.className="keyword-tag";const c=[];g.slice(n.startLine,n.endLine+1).forEach((a,f)=>{a.includes(l)&&c.push(n.startLine+f)}),o.innerHTML=`${l} <span class="line-info">(${c.length})</span>`,o.onclick=()=>{w(),v(n),document.querySelectorAll(".line-highlight").forEach(a=>{a.classList.remove("line-highlight")}),setTimeout(()=>{if(c.length>0){const a=document.getElementById(`line-${c[0]}`);a&&(a.scrollIntoView({behavior:"smooth",block:"center"}),a.classList.add("line-highlight"))}},100)},e.appendChild(o)}),i.appendChild(e),L.appendChild(i)}),s.length>0){const n=L.querySelector(".keyword-block");n&&n.querySelector(".keyword-tag").click()}else p.innerHTML='<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>'}async function N(){const s=document.getElementById("log-display"),n=document.getElementById("analysis-result"),r=document.getElementById("analyze-btn"),i=s.innerText;r.disabled=!0,r.textContent="分析中...",u=new AbortController;try{const e=k("/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"system",content:`作为日志分析专家，日志并按照下面的模板回复：
+
+1. 概述
+- 日志类型
+- 涉及组件
+
+2. 原因分析
+- 问题根源
+- 关联性分析
+- 系统模块定位
+
+3. 解决方案
+- 修复建议
+- 预防措施
+
+请使用markdown格式输出分析结果,注意换行符号。`},{role:"user",content:i}],stream:!0}),signal:u.signal});n.innerHTML="";let t="";for await(const l of e){const o=l.choices[0].delta.content;if(o){t+=o;const c=C.render(t);n.innerHTML=`<div class="markdown">${c}</div>`}}}catch(e){e.name==="AbortError"?n.innerHTML='<div class="markdown">分析已停止</div>':n.innerHTML=`<div class="markdown">分析出错: ${e.message}</div>`}finally{r.disabled=!1,r.textContent="分析日志",u=null}}function w(){u&&(u.abort(),u=null);const s=document.getElementById("analysis-result");s.innerHTML=""}window.addEventListener("message",s=>{const n=s.data;h=S(n),g=n.split(`
+`);const r=new Set;h.forEach(i=>{i.keywords.forEach(e=>r.add(e))}),d=new Map,r.forEach(i=>d.set(i,!0)),y.innerHTML="",r.forEach(i=>{const e=document.createElement("span");e.className="filter-tag active",e.textContent=i,e.onclick=()=>{const t=d.get(i);d.set(i,!t),e.className=`filter-tag ${t?"inactive":"active"}`,E()},y.appendChild(e)}),E(),document.getElementById("analyze-btn").addEventListener("click",N)});</script>
 </head>
 
 <body>
@@ -176,9 +256,13 @@
         <div id="keyword-list"></div>
         <div class="right-panel">
             <div id="log-display"></div>
+            <div class="flex justify-end mb-4">
+                <button id="analyze-btn" class="btn btn-primary">分析日志</button>
+            </div>
             <div id="analysis-result">Analysis results will be displayed here.</div>
         </div>
     </div>
+
 </body>
 
 </html>

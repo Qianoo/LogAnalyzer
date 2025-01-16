@@ -1,7 +1,7 @@
 export function parseLogFile(logContent) {
   const MAX_BLOCK_LINES = 300;      // 设置最大行数限制
-  const LINES_BEFORE_FIRST = 100;    // 第一个关键字前显示的行数
-  const LINES_AFTER_LAST = 50;     // 最后一个关键字后显示的行数
+  const LINES_BEFORE_FIRST = 20;    // 第一个关键字前显示的行数
+  const LINES_AFTER_LAST = 10;     // 最后一个关键字后显示的行数
   
   const keywords = [
     // C++ 常见错误日志关键字
@@ -16,15 +16,14 @@ export function parseLogFile(logContent) {
     
     // Android 系统性错误日志关键字
     'ANR', 'FATAL EXCEPTION', 'ActivityManager: Force finishing activity',
-    'Process terminated', 'BinderProxy', 'E/AndroidRuntime', 'W/ActivityThread',
-    'StrictMode',
+    'E/AndroidRuntime', 'W/ActivityThread','StrictMode',
     
     // Linux Kernel 常见错误日志关键字
     'kernel panic', 'Oops', 'BUG:', 'soft lockup', 'hard lockup', 'Call Trace',
     'slab corruption', 'general protection fault', 'I/O error', 'bad page state',
     
     // 通用系统错误日志关键字
-    'Error', 'Warning', 'Critical', 'Failed', 'Exception', 'Timeout',
+    'Error', 'Critical', 'Failed', 'Exception', 'Timeout',
     'Permission denied', 'Device not found'
   ];
   const lines = logContent.split('\n');

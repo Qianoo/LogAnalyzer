@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyzer Result</title>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -16,9 +17,10 @@
 
         h1 {
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             margin: 0;
             background-color: #f5f5f5;
+            font-size: 1.5rem;
         }
 
         #container {
@@ -52,6 +54,9 @@
             height: 30%;
             overflow-y: auto;
             padding: 15px;
+            background-color: #ffffff;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .keyword {
@@ -80,8 +85,8 @@
         }
 
         .keyword-block {
-            margin: 15px 0;
-            padding: 10px;
+            margin: 8px 0;
+            padding: 6px;
             background-color: #f8f9fa;
             border-radius: 4px;
         }
@@ -93,14 +98,13 @@
         }
 
         .keyword-tag {
-            display: inline-block;
-            padding: 4px 8px;
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            margin: 2px;
+            border-radius: 3px;
             background-color: #e7f3ff;
             border: 1px solid #b3d7ff;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.2s;
         }
 
         .keyword-tag:hover {
@@ -137,19 +141,21 @@
         }
 
         #filter-container {
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
+            padding: 8px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 4px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
         }
 
         .filter-tag {
-            padding: 4px 12px;
-            border-radius: 16px;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s;
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
         }
 
         .filter-tag.active {
@@ -159,7 +165,66 @@
 
         .filter-tag.inactive {
             background-color: #e9ecef;
-            color: #6c757d;
+            color: #666;
+        }
+
+        .markdown {
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .markdown h1 {
+            font-size: 1.4em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown h2 {
+            font-size: 1.2em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown h3 {
+            font-size: 1.1em;
+            margin-top: 0.8em;
+            margin-bottom: 0.4em;
+        }
+
+        .markdown ul,
+        .markdown ol {
+            padding-left: 1.5em;
+            margin-bottom: 0.8em;
+        }
+
+        .markdown li {
+            margin-bottom: 0.3em;
+        }
+
+        .markdown code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .markdown pre {
+            background-color: #f5f5f5;
+            padding: 1em;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1em 0;
+        }
+
+        .markdown blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #666;
+        }
+
+        .markdown p {
+            margin-bottom: 0.8em;
         }
     </style>
 </head>
@@ -171,20 +236,277 @@
         <div id="keyword-list"></div>
         <div class="right-panel">
             <div id="log-display"></div>
+            <div class="flex justify-end mb-4">
+                <button id="analyze-btn" class="btn btn-primary">分析日志</button>
+            </div>
             <div id="analysis-result">Analysis results will be displayed here.</div>
         </div>
     </div>
+
     <script type="module">
         import { parseLogFile } from './src/logParser.js';
 
+        // 添加 TextLineStream 的实现
+        class TextLineStream extends TransformStream {
+            constructor() {
+                let buffer = '';
+                super({
+                    transform(chunk, controller) {
+                        buffer += chunk;
+                        const lines = buffer.split(/\r\n|\n|\r/);
+                        buffer = lines.pop() || '';
+                        for (const line of lines) {
+                            controller.enqueue(line);
+                        }
+                    },
+                    flush(controller) {
+                        if (buffer) controller.enqueue(buffer);
+                    }
+                });
+            }
+        }
+
+        // 添加 sendSSEPostRequest 函数
+        async function* sendSSEPostRequest(url, options) {
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const reader = response.body
+                .pipeThrough(new TextDecoderStream())
+                .pipeThrough(new TextLineStream());
+
+            for await (const line of reader) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(5);
+                    if (data === '[DONE]') {
+                        return;
+                    }
+                    try {
+                        yield JSON.parse(data);
+                    } catch (e) {
+                        console.error('Error parsing SSE data:', e);
+                    }
+                }
+            }
+        }
+
+        // 创建 markdown-it 实例
+        const md = window.markdownit({
+            html: true,
+            linkify: true,
+            typographer: true,
+            breaks: true
+        });
+
+        // 添加全局变量
+        let currentAnalysisController = null;
+        let keywordBlocks = [];
+        let lines = [];
+        let keywordFilters = new Map();
+
+        // 获取 DOM 元素的引用
+        const filterContainer = document.getElementById('filter-container');
+        const keywordListElem = document.getElementById('keyword-list');
+        const logDisplayElem = document.getElementById('log-display');
+
+        function displayBlockContent(block) {
+            logDisplayElem.innerHTML = '';
+
+            const headerElem = document.createElement('div');
+            headerElem.className = 'block-header';
+            const lineCount = block.endLine - block.startLine + 1;
+            const truncatedMessage = lineCount >= 500 ? ' (Truncated to 500 lines)' : '';
+            headerElem.textContent = `Log Block (Lines ${block.startLine + 1} - ${block.endLine + 1})${truncatedMessage}`;
+            logDisplayElem.appendChild(headerElem);
+
+            const blockLines = lines.slice(block.startLine, block.endLine + 1);
+            blockLines.forEach((line, index) => {
+                const lineElem = document.createElement('div');
+                const actualLineNum = block.startLine + index;
+                lineElem.id = `line-${actualLineNum}`;
+                lineElem.innerHTML = `<span class="line-number">${actualLineNum + 1}</span>${line}`;
+
+                if (block.keywords.some(keyword =>
+                    keywordFilters.get(keyword) && line.includes(keyword))) {
+                    lineElem.classList.add('highlight');
+                }
+                logDisplayElem.appendChild(lineElem);
+            });
+
+            if (lineCount >= 500) {
+                const truncateNote = document.createElement('div');
+                truncateNote.className = 'truncate-note';
+                truncateNote.style.color = '#666';
+                truncateNote.style.padding = '10px';
+                truncateNote.style.fontStyle = 'italic';
+                truncateNote.textContent = 'Note: Log block has been truncated to 500 lines for better performance.';
+                logDisplayElem.appendChild(truncateNote);
+            }
+        }
+
+        function updateDisplay() {
+            // 停止当前分析
+            stopAnalysis();
+
+            keywordListElem.innerHTML = '';
+
+            // 过滤并显示关键字块
+            const visibleBlocks = keywordBlocks.filter(block => {
+                return block.keywords.some(keyword => keywordFilters.get(keyword));
+            });
+
+            visibleBlocks.forEach((block, blockIndex) => {
+                const blockElem = document.createElement('div');
+                blockElem.className = 'keyword-block';
+
+                const tagsContainer = document.createElement('div');
+                tagsContainer.className = 'keyword-tags';
+
+                // 只显示活跃的关键字标签
+                const activeKeywords = block.keywords.filter(keyword =>
+                    keywordFilters.get(keyword));
+
+                activeKeywords.forEach(keyword => {
+                    const tag = document.createElement('span');
+                    tag.className = 'keyword-tag';
+
+                    const keywordLines = [];
+                    lines.slice(block.startLine, block.endLine + 1).forEach((line, idx) => {
+                        if (line.includes(keyword)) {
+                            keywordLines.push(block.startLine + idx);
+                        }
+                    });
+
+                    tag.innerHTML = `${keyword} <span class="line-info">(${keywordLines.length})</span>`;
+                    tag.onclick = () => {
+                        // 停止当前分析
+                        stopAnalysis();
+
+                        displayBlockContent(block);
+                        document.querySelectorAll('.line-highlight').forEach(el => {
+                            el.classList.remove('line-highlight');
+                        });
+                        setTimeout(() => {
+                            if (keywordLines.length > 0) {
+                                const targetLine = document.getElementById(`line-${keywordLines[0]}`);
+                                if (targetLine) {
+                                    targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    targetLine.classList.add('line-highlight');
+                                }
+                            }
+                        }, 100);
+                    };
+                    tagsContainer.appendChild(tag);
+                });
+
+                blockElem.appendChild(tagsContainer);
+                keywordListElem.appendChild(blockElem);
+            });
+
+            // 如果有显示的块，显示第一个块的内容
+            if (visibleBlocks.length > 0) {
+                const firstBlock = keywordListElem.querySelector('.keyword-block');
+                if (firstBlock) {
+                    firstBlock.querySelector('.keyword-tag').click();
+                }
+            } else {
+                logDisplayElem.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>';
+            }
+        }
+
+        // 修改 analyzeLog 函数
+        async function analyzeLog() {
+            const logDisplayElem = document.getElementById('log-display');
+            const analysisResultElem = document.getElementById('analysis-result');
+            const analyzeBtn = document.getElementById('analyze-btn');
+
+            const currentLogContent = logDisplayElem.innerText;
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = '分析中...';
+
+            currentAnalysisController = new AbortController();
+
+            try {
+                const chunks = sendSSEPostRequest('/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                role: 'system',
+                                content: `作为日志分析专家，日志并按照下面的模板回复：
+
+1. 概述
+- 日志类型
+- 涉及组件
+
+2. 原因分析
+- 问题根源
+- 关联性分析
+- 系统模块定位
+
+3. 解决方案
+- 修复建议
+- 预防措施
+
+请使用markdown格式输出分析结果,注意换行符号。`
+                            },
+                            {
+                                role: 'user',
+                                content: currentLogContent
+                            }
+                        ],
+                        stream: true
+                    }),
+                    signal: currentAnalysisController.signal
+                });
+
+                // 清空之前的分析结果
+                analysisResultElem.innerHTML = '';
+                let analysisContent = '';
+
+                for await (const chunk of chunks) {
+                    const addedContent = chunk.choices[0].delta.content;
+                    if (addedContent) {
+                        analysisContent += addedContent;
+                        // 使用 markdown-it 渲染内容，并确保包含在 markdown 类中
+                        const renderedContent = md.render(analysisContent);
+                        analysisResultElem.innerHTML = `<div class="markdown">${renderedContent}</div>`;
+                    }
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    analysisResultElem.innerHTML = '<div class="markdown">分析已停止</div>';
+                } else {
+                    analysisResultElem.innerHTML = `<div class="markdown">分析出错: ${error.message}</div>`;
+                }
+            } finally {
+                // 恢复按钮状态
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = '分析日志';
+                currentAnalysisController = null;
+            }
+        }
+
+        // 添加停止分析的函数
+        function stopAnalysis() {
+            if (currentAnalysisController) {
+                currentAnalysisController.abort();
+                currentAnalysisController = null;
+            }
+            const analysisResultElem = document.getElementById('analysis-result');
+            analysisResultElem.innerHTML = '';
+        }
+
         window.addEventListener('message', (event) => {
             const logContent = event.data;
-            const keywordBlocks = parseLogFile(logContent);
-            const lines = logContent.split('\n');
-
-            const filterContainer = document.getElementById('filter-container');
-            const keywordListElem = document.getElementById('keyword-list');
-            const logDisplayElem = document.getElementById('log-display');
+            keywordBlocks = parseLogFile(logContent);
+            lines = logContent.split('\n');
 
             // 收集所有唯一的关键字
             const allKeywords = new Set();
@@ -192,44 +514,12 @@
                 block.keywords.forEach(keyword => allKeywords.add(keyword));
             });
 
-            // 存储关键字过滤状态
-            const keywordFilters = new Map();
+            // 重置关键字过滤状态
+            keywordFilters = new Map();
             allKeywords.forEach(keyword => keywordFilters.set(keyword, true));
 
-            function displayBlockContent(block) {
-                logDisplayElem.innerHTML = '';
-
-                const headerElem = document.createElement('div');
-                headerElem.className = 'block-header';
-                const lineCount = block.endLine - block.startLine + 1;
-                const truncatedMessage = lineCount >= 500 ? ' (Truncated to 500 lines)' : '';
-                headerElem.textContent = `Log Block (Lines ${block.startLine + 1} - ${block.endLine + 1})${truncatedMessage}`;
-                logDisplayElem.appendChild(headerElem);
-
-                const blockLines = lines.slice(block.startLine, block.endLine + 1);
-                blockLines.forEach((line, index) => {
-                    const lineElem = document.createElement('div');
-                    const actualLineNum = block.startLine + index;
-                    lineElem.id = `line-${actualLineNum}`;
-                    lineElem.innerHTML = `<span class="line-number">${actualLineNum + 1}</span>${line}`;
-
-                    if (block.keywords.some(keyword =>
-                        keywordFilters.get(keyword) && line.includes(keyword))) {
-                        lineElem.classList.add('highlight');
-                    }
-                    logDisplayElem.appendChild(lineElem);
-                });
-
-                if (lineCount >= 500) {
-                    const truncateNote = document.createElement('div');
-                    truncateNote.className = 'truncate-note';
-                    truncateNote.style.color = '#666';
-                    truncateNote.style.padding = '10px';
-                    truncateNote.style.fontStyle = 'italic';
-                    truncateNote.textContent = 'Note: Log block has been truncated to 500 lines for better performance.';
-                    logDisplayElem.appendChild(truncateNote);
-                }
-            }
+            // 清空过滤器容器
+            filterContainer.innerHTML = '';
 
             // 创建过滤器标签
             allKeywords.forEach(keyword => {
@@ -245,72 +535,11 @@
                 filterContainer.appendChild(filterTag);
             });
 
-            function updateDisplay() {
-                keywordListElem.innerHTML = '';
-
-                // 过滤并显示关键字块
-                const visibleBlocks = keywordBlocks.filter(block => {
-                    return block.keywords.some(keyword => keywordFilters.get(keyword));
-                });
-
-                visibleBlocks.forEach((block, blockIndex) => {
-                    const blockElem = document.createElement('div');
-                    blockElem.className = 'keyword-block';
-
-                    const tagsContainer = document.createElement('div');
-                    tagsContainer.className = 'keyword-tags';
-
-                    // 只显示活跃的关键字标签
-                    const activeKeywords = block.keywords.filter(keyword =>
-                        keywordFilters.get(keyword));
-
-                    activeKeywords.forEach(keyword => {
-                        const tag = document.createElement('span');
-                        tag.className = 'keyword-tag';
-
-                        const keywordLines = [];
-                        lines.slice(block.startLine, block.endLine + 1).forEach((line, idx) => {
-                            if (line.includes(keyword)) {
-                                keywordLines.push(block.startLine + idx);
-                            }
-                        });
-
-                        tag.innerHTML = `${keyword} <span class="line-info">(${keywordLines.length})</span>`;
-                        tag.onclick = () => {
-                            displayBlockContent(block);
-                            document.querySelectorAll('.line-highlight').forEach(el => {
-                                el.classList.remove('line-highlight');
-                            });
-                            setTimeout(() => {
-                                if (keywordLines.length > 0) {
-                                    const targetLine = document.getElementById(`line-${keywordLines[0]}`);
-                                    if (targetLine) {
-                                        targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                        targetLine.classList.add('line-highlight');
-                                    }
-                                }
-                            }, 100);
-                        };
-                        tagsContainer.appendChild(tag);
-                    });
-
-                    blockElem.appendChild(tagsContainer);
-                    keywordListElem.appendChild(blockElem);
-                });
-
-                // 如果有显示的块，显示第一个块的内容
-                if (visibleBlocks.length > 0) {
-                    const firstBlock = keywordListElem.querySelector('.keyword-block');
-                    if (firstBlock) {
-                        firstBlock.querySelector('.keyword-tag').click();
-                    }
-                } else {
-                    logDisplayElem.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>';
-                }
-            }
-
             // 初始显示
             updateDisplay();
+
+            // 添加分析按钮的点击事件监听
+            document.getElementById('analyze-btn').addEventListener('click', analyzeLog);
         });
     </script>
 </body>
