@@ -228,9 +228,93 @@
         .markdown p {
             margin-bottom: 0.8em;
         }
+
+        /* 添加容器样式 */
+        .split-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 150px);
+            /* 减去其他元素的高度 */
+            position: relative;
+        }
+
+        /* 日志显示窗口 */
+        #log-display {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            min-height: 100px;
+            /* 最小高度 */
+        }
+
+        /* 可拖动的分隔条 */
+        .resizer {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            cursor: row-resize;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* 分隔条中间的线 */
+        .resizer::after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 2px;
+            background: #999;
+            margin: 3px auto;
+        }
+
+        /* 分析结果窗口 */
+        #analysis-result {
+            height: 200px;
+            /* 初始高度 */
+            overflow-y: auto;
+            padding: 10px;
+            min-height: 100px;
+            /* 最小高度 */
+        }
+
+        /* 拖动时的遮罩层 */
+        .resize-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+        }
+
+        /* 添加进度条样式 */
+        .progress-container {
+            display: none;
+            /* 默认隐藏 */
+            width: 100%;
+            padding: 10px;
+            background-color: #f5f5f5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 4px;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            margin-top: 4px;
+        }
     </style>
-  <script type="module" crossorigin>(function(){const n=document.createElement("link").relList;if(n&&n.supports&&n.supports("modulepreload"))return;for(const e of document.querySelectorAll('link[rel="modulepreload"]'))i(e);new MutationObserver(e=>{for(const t of e)if(t.type==="childList")for(const l of t.addedNodes)l.tagName==="LINK"&&l.rel==="modulepreload"&&i(l)}).observe(document,{childList:!0,subtree:!0});function r(e){const t={};return e.integrity&&(t.integrity=e.integrity),e.referrerPolicy&&(t.referrerPolicy=e.referrerPolicy),e.crossOrigin==="use-credentials"?t.credentials="include":e.crossOrigin==="anonymous"?t.credentials="omit":t.credentials="same-origin",t}function i(e){if(e.ep)return;e.ep=!0;const t=r(e);fetch(e.href,t)}})();function S(s){const e=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","soft lockup","hard lockup","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],t=s.split(`
-`),l=[];let o=null;return t.forEach((c,a)=>{const f=e.filter(m=>c.includes(m));if(f.length>0)if(!o||a-o.endLine>10)o&&(o.endLine-o.startLine>300&&(o.endLine=o.startLine+300),l.push(o)),o={keywords:f,startLine:Math.max(0,a-20),endLine:Math.min(t.length,a+10),lines:[]};else{o.keywords.push(...f);const m=Math.min(t.length,a+10);m-o.startLine<=300&&(o.endLine=m)}o&&o.lines.push(c)}),o&&(o.endLine-o.startLine>300&&(o.endLine=o.startLine+300),l.push(o)),l}class T extends TransformStream{constructor(){let n="";super({transform(r,i){n+=r;const e=n.split(/\r\n|\n|\r/);n=e.pop()||"";for(const t of e)i.enqueue(t)},flush(r){n&&r.enqueue(n)}})}}async function*k(s,n){const r=await fetch(s,n);if(!r.ok)throw new Error(`HTTP error! status: ${r.status}`);const i=r.body.pipeThrough(new TextDecoderStream).pipeThrough(new T);for await(const e of i)if(e.startsWith("data: ")){const t=e.slice(5);if(t==="[DONE]")return;try{yield JSON.parse(t)}catch(l){console.error("Error parsing SSE data:",l)}}}const C=window.markdownit({html:!0,linkify:!0,typographer:!0,breaks:!0});let u=null,h=[],g=[],d=new Map;const y=document.getElementById("filter-container"),L=document.getElementById("keyword-list"),p=document.getElementById("log-display");function v(s){p.innerHTML="";const n=document.createElement("div");n.className="block-header";const r=s.endLine-s.startLine+1,i=r>=500?" (Truncated to 500 lines)":"";if(n.textContent=`Log Block (Lines ${s.startLine+1} - ${s.endLine+1})${i}`,p.appendChild(n),g.slice(s.startLine,s.endLine+1).forEach((t,l)=>{const o=document.createElement("div"),c=s.startLine+l;o.id=`line-${c}`,o.innerHTML=`<span class="line-number">${c+1}</span>${t}`,s.keywords.some(a=>d.get(a)&&t.includes(a))&&o.classList.add("highlight"),p.appendChild(o)}),r>=500){const t=document.createElement("div");t.className="truncate-note",t.style.color="#666",t.style.padding="10px",t.style.fontStyle="italic",t.textContent="Note: Log block has been truncated to 500 lines for better performance.",p.appendChild(t)}}function E(){w(),L.innerHTML="";const s=h.filter(n=>n.keywords.some(r=>d.get(r)));if(s.forEach((n,r)=>{const i=document.createElement("div");i.className="keyword-block";const e=document.createElement("div");e.className="keyword-tags",n.keywords.filter(l=>d.get(l)).forEach(l=>{const o=document.createElement("span");o.className="keyword-tag";const c=[];g.slice(n.startLine,n.endLine+1).forEach((a,f)=>{a.includes(l)&&c.push(n.startLine+f)}),o.innerHTML=`${l} <span class="line-info">(${c.length})</span>`,o.onclick=()=>{w(),v(n),document.querySelectorAll(".line-highlight").forEach(a=>{a.classList.remove("line-highlight")}),setTimeout(()=>{if(c.length>0){const a=document.getElementById(`line-${c[0]}`);a&&(a.scrollIntoView({behavior:"smooth",block:"center"}),a.classList.add("line-highlight"))}},100)},e.appendChild(o)}),i.appendChild(e),L.appendChild(i)}),s.length>0){const n=L.querySelector(".keyword-block");n&&n.querySelector(".keyword-tag").click()}else p.innerHTML='<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>'}async function N(){const s=document.getElementById("log-display"),n=document.getElementById("analysis-result"),r=document.getElementById("analyze-btn"),i=s.innerText;r.disabled=!0,r.textContent="分析中...",u=new AbortController;try{const e=k("/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"system",content:`作为日志分析专家，日志并按照下面的模板回复：
+  <script type="module" crossorigin>(function(){const o=document.createElement("link").relList;if(o&&o.supports&&o.supports("modulepreload"))return;for(const n of document.querySelectorAll('link[rel="modulepreload"]'))l(n);new MutationObserver(n=>{for(const i of n)if(i.type==="childList")for(const s of i.addedNodes)s.tagName==="LINK"&&s.rel==="modulepreload"&&l(s)}).observe(document,{childList:!0,subtree:!0});function a(n){const i={};return n.integrity&&(i.integrity=n.integrity),n.referrerPolicy&&(i.referrerPolicy=n.referrerPolicy),n.crossOrigin==="use-credentials"?i.credentials="include":n.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function l(n){if(n.ep)return;n.ep=!0;const i=a(n);fetch(n.href,i)}})();function M(r){const n=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"];function*i(c){const g=c.split(`
+`);for(let u=0;u<g.length;u++)yield{line:g[u],index:u}}const s=[];let t=null,d=[];const e=i(r);for(const{line:c,index:g}of e){d.push(c),d.length>10&&d.shift();const u=n.filter(S=>c.includes(S));u.length>0?(t?(t.keywords.push(...u),t.endLine=Math.min(g+10,t.startLine+300)):t={startLine:Math.max(0,g-10),endLine:Math.min(g+10),keywords:u,lines:[...d]},t.lines.push(c)):t&&(t.lines.push(c),(g>=t.endLine||t.lines.length>=300)&&(s.push(t),t=null,d=[c]))}return t&&s.push(t),s}const w={defaultLogAnalysis:`作为日志分析专家，日志并按照下面的模板回复：
 
 1. 概述
 - 日志类型
@@ -240,13 +324,137 @@
 - 问题根源
 - 关联性分析
 - 系统模块定位
+- 根据下面的owner联系列表,推测出模块的owner和Manager
 
 3. 解决方案
 - 修复建议
 - 预防措施
 
-请使用markdown格式输出分析结果,注意换行符号。`},{role:"user",content:i}],stream:!0}),signal:u.signal});n.innerHTML="";let t="";for await(const l of e){const o=l.choices[0].delta.content;if(o){t+=o;const c=C.render(t);n.innerHTML=`<div class="markdown">${c}</div>`}}}catch(e){e.name==="AbortError"?n.innerHTML='<div class="markdown">分析已停止</div>':n.innerHTML=`<div class="markdown">分析出错: ${e.message}</div>`}finally{r.disabled=!1,r.textContent="分析日志",u=null}}function w(){u&&(u.abort(),u=null);const s=document.getElementById("analysis-result");s.innerHTML=""}window.addEventListener("message",s=>{const n=s.data;h=S(n),g=n.split(`
-`);const r=new Set;h.forEach(i=>{i.keywords.forEach(e=>r.add(e))}),d=new Map,r.forEach(i=>d.set(i,!0)),y.innerHTML="",r.forEach(i=>{const e=document.createElement("span");e.className="filter-tag active",e.textContent=i,e.onclick=()=>{const t=d.get(i);d.set(i,!t),e.className=`filter-tag ${t?"inactive":"active"}`,E()},y.appendChild(e)}),E(),document.getElementById("analyze-btn").addEventListener("click",N)});</script>
+
+请注意这是模块的联系列表和Manager:
+部门、模块与负责人清单
+
+Platform (Manager: Victor Wan)
+uboot: Tao Zeng
+bl2: Tao Zeng
+bl31: Tao Zeng
+kernel: Jianxin Pan
+bl30: Qiufang Dai
+Storage drivers: Yonghui Yu
+gpio: Qianggui Song
+pinctrl: Qianggui Song
+i2c: Jian Hu
+clk tree: Jian Hu
+spi: Sunny Luo
+spi nand: Sunny Luo
+spi nor flash: Sunny Luo
+pwm: Bichao Zheng
+emmc: Long Yu
+sdio: Liang Yang
+WIFI/BT: Larson Jiang
+wifi driver: Rongjun Chen
+wifi driver (freertos): Bo Li
+wifi driver (buildroot): Jiabin Chen
+bt driver: Qiu Zeng
+secureos: Peifu Jiang, Pengguang Zhu, Rui Guo
+freertos: Jianxiong Pan
+usb: Yue Wang
+ethernet phy: Zhuo Wang
+uart: Qi Duan, Yu Tu
+Audio (Manager: Jian Xu)
+audio driver: Shuai Li
+audio hal: Shuai Li
+dsp driver: Jiebin Chen
+audio eq/drc: Zhe Wang
+dolby/dts MS12: Yujie Wu
+
+Display / Graphic (Manager: Simon Zheng)
+OSD: Brain Zhu
+camera ISP: Xiaoxin Cao
+Graphic: Sky Zhou
+buildroot DRM: Ao Xu
+NPU driver: Xingwei Zhou
+NPU APP: Deng Liu
+OSD driver: Pengcheng Chen
+GE2D/GDC: Jian Cao
+PIP: Jintao Xu
+ISP driver: Junwei Ma, Jiacheng Mei, Keke Li
+camera hal: Dong Wei
+camera IQ: Yu Zhang
+
+HDMI (Manager: Frank Zhao)
+Panel Cvbs: Evoke Zhang
+HDMI TX: Zongdong Jiao
+HDMI RX: Lei Yang, Yicheng Shen
+Media (Manager: Zhi Zhou)
+decoder: Hui Zhang
+Android player: Lifeng Cao
+DRM player: Shipeng Sun, Tao Guo
+
+Android AE (Manager: Tellen Yu)
+TV framework: Kieth Liu
+CEC: An Xi
+camera apk: Jie Yuan
+Android System: Shuide Chen
+Android 公版 (Manager: Tao Dong)
+OTT release: Gongwei Chen
+TV release: Lei Qian
+DS release: Chunlong Cao
+system control: Kaifu Hu
+burning tools: Yihui Wu
+OTA: Zhigang Yu
+
+Buildroot (Manager: Guofeng Tang)
+RDK: Jun Zhang, Daogao Xu
+IPC SDK: Hengrui Li, Zhengyu Gao, Xuequan Feng, Yongbin He, Qiang Wei
+ISP/encoder SDK: Yang Su
+HW (Manager: Kun Zhang)
+DDR SW: Jiaxin Ye, Zhiguang Ouyang
+IPC HW: Chuanting Xu
+IPC/OTT HW: Yuanyuan Li
+FAE HW: Linlin Cao
+TV HW: Siwei Chen
+HW: Jie Feng
+
+IT
+服务器: Jia Wang, Rocky Duan
+设备: Jianjun Xi, Penghui Wang
+QA (Managers: Xiuyue Zhang, Ping Xiong)
+Amazon: Chen Chen
+OTT: Lingling Yu
+IPC: Nannan Meng
+`,detailedLogAnalysis:`作为日志分析专家，请详细分析以下日志：
+
+1. 日志概述
+- 日志类型和格式
+- 时间范围分析
+- 涉及的系统组件
+- 日志严重程度分布
+
+2. 问题诊断
+- 错误模式识别
+- 异常事件时序
+- 系统状态分析
+- 性能指标评估
+
+3. 根因分析
+- 直接原因
+- 潜在因素
+- 系统瓶颈
+- 组件间依赖
+
+4. 解决方案
+- 即时修复建议
+- 长期优化方案
+- 监控建议
+- 预防措施`,simpleLogAnalysis:`简要分析此日志：
+1. 问题描述
+2. 原因分析
+3. 解决方案`};function I(r="defaultLogAnalysis"){return`${w.owner_prompt}
+
+${w[r]}`}async function k(){try{const o=await(await fetch("/config/custom-prompts.json")).json();Object.assign(w,o)}catch(r){console.warn("Failed to load custom prompts:",r)}}k();let h=[],L=[],m=new Map,y=null;const E=document.getElementById("filter-container"),p=document.getElementById("keyword-list"),f=document.getElementById("log-display"),v=window.markdownit({html:!0,linkify:!0,typographer:!0});window.addEventListener("message",async r=>{const o=document.getElementById("progress-container"),a=document.getElementById("progress-bar"),l=document.getElementById("progress-text");o.style.display="block",a.style.width="0%",l.textContent="正在解析日志文件...",await new Promise(n=>requestAnimationFrame(n));try{await new Promise(e=>setTimeout(e,0));const n=r.data;L=n.split(`
+`);const i=L.length;l.textContent="正在解析日志内容...",h=await new Promise(e=>{setTimeout(()=>{const c=M(n);a.style.width="30%",e(c)},0)}),l.textContent="正在处理关键字...",await new Promise(e=>setTimeout(e,0));const s=new Set;for(let e=0;e<h.length;e++){h[e].keywords.forEach(u=>s.add(u));const g=Math.round(30+e/h.length*30);a.style.width=`${g}%`,e%10===0&&await new Promise(u=>setTimeout(u,0))}l.textContent="正在更新界面...",a.style.width="60%",await new Promise(e=>setTimeout(e,0)),E.innerHTML="",p.innerHTML="",m=new Map,s.forEach(e=>m.set(e,!0));let t=0;const d=s.size;for(const e of s){const c=document.createElement("span");c.className="filter-tag active",c.textContent=e,c.onclick=()=>{const u=m.get(e);m.set(e,!u),c.className=`filter-tag ${u?"inactive":"active"}`,C()},E.appendChild(c),t++;const g=Math.round(60+t/d*20);a.style.width=`${g}%`,t%5===0&&await new Promise(u=>setTimeout(u,0))}l.textContent="正在渲染内容...",a.style.width="80%",await new Promise(e=>setTimeout(e,0)),C(),a.style.width="100%",l.textContent="处理完成",setTimeout(()=>{o.style.display="none"},1e3)}catch(n){console.error("Error processing log:",n),l.textContent="处理出错: "+n.message,a.style.backgroundColor="#ff4444",setTimeout(()=>{o.style.display="none"},3e3)}});function A(r){f.innerHTML="";const o=document.createElement("div");o.className="block-header";const a=r.endLine-r.startLine+1,l=a>=500?" (Truncated to 500 lines)":"";if(o.textContent=`Log Block (Lines ${r.startLine+1} - ${r.endLine+1})${l}`,f.appendChild(o),L.slice(r.startLine,r.endLine+1).forEach((i,s)=>{const t=document.createElement("div"),d=r.startLine+s;t.id=`line-${d}`,t.innerHTML=`<span class="line-number">${d+1}</span>${i}`,r.keywords.some(e=>m.get(e)&&i.includes(e))&&t.classList.add("highlight"),f.appendChild(t)}),a>=500){const i=document.createElement("div");i.className="truncate-note",i.style.color="#666",i.style.padding="10px",i.style.fontStyle="italic",i.textContent="Note: Log block has been truncated to 500 lines for better performance.",f.appendChild(i)}}function C(){T(),p.innerHTML="";const r=h.filter(o=>o.keywords.some(a=>m.get(a)));if(r.forEach((o,a)=>{const l=document.createElement("div");l.className="keyword-block";const n=document.createElement("div");n.className="keyword-tags",o.keywords.filter(s=>m.get(s)).forEach(s=>{const t=document.createElement("span");t.className="keyword-tag";const d=[];L.slice(o.startLine,o.endLine+1).forEach((e,c)=>{e.includes(s)&&d.push(o.startLine+c)}),t.innerHTML=`${s} <span class="line-info">(${d.length})</span>`,t.onclick=()=>{T(),A(o),document.querySelectorAll(".line-highlight").forEach(e=>{e.classList.remove("line-highlight")}),setTimeout(()=>{if(d.length>0){const e=document.getElementById(`line-${d[0]}`);e&&(e.scrollIntoView({behavior:"smooth",block:"center"}),e.classList.add("line-highlight"))}},100)},n.appendChild(t)}),l.appendChild(n),p.appendChild(l)}),r.length>0){const o=p.querySelector(".keyword-block");o&&o.querySelector(".keyword-tag").click()}else f.innerHTML='<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>'}document.addEventListener("DOMContentLoaded",()=>{const r=document.getElementById("analyze-btn");r&&r.addEventListener("click",P)});async function P(){const r=document.getElementById("log-display"),o=document.getElementById("analysis-result"),a=document.getElementById("analyze-btn"),l=r.innerText;a.disabled=!0,a.textContent="分析中...",o.innerHTML='<div class="markdown">正在分析，请等待...</div>',y=new AbortController;try{const n=b("/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"system",content:I("defaultLogAnalysis")},{role:"user",content:l}],stream:!0}),signal:y.signal});o.innerHTML="";let i="";for await(const s of n){const t=s.choices[0].delta.content;if(t){i+=t;const d=v.render(i);o.innerHTML=`<div class="markdown">${d}</div>`}}}catch(n){console.error("Analysis error:",n),o.innerHTML=`<div class="markdown">分析出错: ${n.message}</div>`}finally{a.disabled=!1,a.textContent="分析日志"}}function T(){y&&(y.abort(),y=null);const r=document.getElementById("analysis-result");r.innerHTML=""}async function*b(r,o){const a=await fetch(r,o);if(!a.ok)throw new Error(`HTTP error! status: ${a.status}`);const l=a.body.getReader(),n=new TextDecoder;let i="";for(;;){const{value:s,done:t}=await l.read();if(t)break;i+=n.decode(s,{stream:!0});const d=i.split(`
+`);i=d.pop()||"";for(const e of d)if(e.trim()!==""&&e.startsWith("data: ")){const c=e.slice(6);if(c==="[DONE]")return;try{yield JSON.parse(c)}catch(g){console.warn("Failed to parse SSE data:",g)}}}}</script>
 </head>
 
 <body>
@@ -255,12 +463,21 @@
     <div id="container">
         <div id="keyword-list"></div>
         <div class="right-panel">
-            <div id="log-display"></div>
+            <div class="split-container">
+                <div id="log-display"></div>
+                <div class="resizer"></div>
+                <div id="analysis-result">Analysis results will be displayed here.</div>
+            </div>
             <div class="flex justify-end mb-4">
                 <button id="analyze-btn" class="btn btn-primary">分析日志</button>
             </div>
-            <div id="analysis-result">Analysis results will be displayed here.</div>
         </div>
+    </div>
+
+    <!-- 添加进度条HTML -->
+    <div class="progress-container" id="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+        <div class="progress-text" id="progress-text">正在解析日志...</div>
     </div>
 
 </body>

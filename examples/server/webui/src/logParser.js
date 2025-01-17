@@ -1,6 +1,6 @@
 export function parseLogFile(logContent) {
   const MAX_BLOCK_LINES = 300;      // 设置最大行数限制
-  const LINES_BEFORE_FIRST = 20;    // 第一个关键字前显示的行数
+  const LINES_BEFORE_FIRST = 10;    // 第一个关键字前显示的行数
   const LINES_AFTER_LAST = 10;     // 最后一个关键字后显示的行数
   
   const keywords = [
@@ -19,55 +19,71 @@ export function parseLogFile(logContent) {
     'E/AndroidRuntime', 'W/ActivityThread','StrictMode',
     
     // Linux Kernel 常见错误日志关键字
-    'kernel panic', 'Oops', 'BUG:', 'soft lockup', 'hard lockup', 'Call Trace',
+    'kernel panic', 'Oops', 'BUG:', 'Call Trace',
     'slab corruption', 'general protection fault', 'I/O error', 'bad page state',
     
     // 通用系统错误日志关键字
     'Error', 'Critical', 'Failed', 'Exception', 'Timeout',
     'Permission denied', 'Device not found'
   ];
-  const lines = logContent.split('\n');
+
+  // 使用迭代器处理大文件
+  function* createLineIterator(content) {
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      yield { line: lines[i], index: i };
+    }
+  }
+
   const keywordBlocks = [];
   let currentBlock = null;
+  let lineBuffer = [];  // 用于临时存储最近的行
+  const lineIterator = createLineIterator(logContent);
 
-  lines.forEach((line, index) => {
+  for (const { line, index } of lineIterator) {
+    // 保持最近 LINES_BEFORE_FIRST 行的缓冲
+    lineBuffer.push(line);
+    if (lineBuffer.length > LINES_BEFORE_FIRST) {
+      lineBuffer.shift();
+    }
+
+    // 检查关键字
     const foundKeywords = keywords.filter(keyword => line.includes(keyword));
+    
     if (foundKeywords.length > 0) {
-      if (!currentBlock || index - currentBlock.endLine > LINES_AFTER_LAST) {
-        if (currentBlock) {
-          // 限制日志块的行数
-          const blockLength = currentBlock.endLine - currentBlock.startLine;
-          if (blockLength > MAX_BLOCK_LINES) {
-            currentBlock.endLine = currentBlock.startLine + MAX_BLOCK_LINES;
-          }
-          keywordBlocks.push(currentBlock);
-        }
+      if (!currentBlock) {
+        // 创建新块，使用缓冲的行
         currentBlock = {
-          keywords: foundKeywords,
           startLine: Math.max(0, index - LINES_BEFORE_FIRST),
-          endLine: Math.min(lines.length, index + LINES_AFTER_LAST),
-          lines: []
+          endLine: Math.min(index + LINES_AFTER_LAST),
+          keywords: foundKeywords,
+          lines: [...lineBuffer]
         };
       } else {
+        // 更新现有块
         currentBlock.keywords.push(...foundKeywords);
-        // 更新结束行，但确保不超过最大行数限制
-        const newEndLine = Math.min(lines.length, index + LINES_AFTER_LAST);
-        if (newEndLine - currentBlock.startLine <= MAX_BLOCK_LINES) {
-          currentBlock.endLine = newEndLine;
-        }
+        currentBlock.endLine = Math.min(
+          index + LINES_AFTER_LAST,
+          currentBlock.startLine + MAX_BLOCK_LINES
+        );
+      }
+      currentBlock.lines.push(line);
+    } else if (currentBlock) {
+      // 继续添加行到当前块
+      currentBlock.lines.push(line);
+      
+      // 检查是否应该结束当前块
+      if (index >= currentBlock.endLine || 
+          currentBlock.lines.length >= MAX_BLOCK_LINES) {
+        keywordBlocks.push(currentBlock);
+        currentBlock = null;
+        lineBuffer = [line];  // 重置缓冲区，保留当前行
       }
     }
-    if (currentBlock) {
-      currentBlock.lines.push(line);
-    }
-  });
+  }
 
   // 处理最后一个块
   if (currentBlock) {
-    const blockLength = currentBlock.endLine - currentBlock.startLine;
-    if (blockLength > MAX_BLOCK_LINES) {
-      currentBlock.endLine = currentBlock.startLine + MAX_BLOCK_LINES;
-    }
     keywordBlocks.push(currentBlock);
   }
 
