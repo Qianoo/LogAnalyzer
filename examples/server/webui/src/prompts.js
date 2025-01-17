@@ -1,6 +1,6 @@
 export const prompts = {
 // 默认的日志分析 prompt
-defaultLogAnalysis: `作为日志分析专家，日志并按照下面的模板回复：
+defaultLogAnalysis: `作为日志分析专家,请你分析日志,推测可能出问题的模块,根据提供的owner联系列表,推测出模块的owner和Manager(最多输出3个可能的联系人),并按照下面的模板回复：
 
 1. 概述
 - 日志类型
@@ -10,16 +10,14 @@ defaultLogAnalysis: `作为日志分析专家，日志并按照下面的模板�
 - 问题根源
 - 关联性分析
 - 系统模块定位
-- 根据下面的owner联系列表,推测出模块的owner和Manager
 
 3. 解决方案
 - 修复建议
 - 预防措施
 
+4.可能的owner和Manager
 
-请注意这是模块的联系列表和Manager:
-部门、模块与负责人清单
-
+请注意这是owner联系列表,你需要在owner联系列表中找到可能的联系人:
 Platform (Manager: Victor Wan)
 uboot: Tao Zeng
 bl2: Tao Zeng
@@ -113,7 +111,7 @@ IPC: Nannan Meng
 ,
 
 // 可以添加更多的 prompts
-detailedLogAnalysis: `作为日志分析专家，请详细分析以下日志：
+detailedLogAnalysis: `作为日志分析专家,请详细分析以下日志：
 
 1. 日志概述
 - 日志类型和格式

@@ -314,7 +314,7 @@
         }
     </style>
   <script type="module" crossorigin>(function(){const o=document.createElement("link").relList;if(o&&o.supports&&o.supports("modulepreload"))return;for(const n of document.querySelectorAll('link[rel="modulepreload"]'))l(n);new MutationObserver(n=>{for(const i of n)if(i.type==="childList")for(const s of i.addedNodes)s.tagName==="LINK"&&s.rel==="modulepreload"&&l(s)}).observe(document,{childList:!0,subtree:!0});function a(n){const i={};return n.integrity&&(i.integrity=n.integrity),n.referrerPolicy&&(i.referrerPolicy=n.referrerPolicy),n.crossOrigin==="use-credentials"?i.credentials="include":n.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function l(n){if(n.ep)return;n.ep=!0;const i=a(n);fetch(n.href,i)}})();function M(r){const n=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"];function*i(c){const g=c.split(`
-`);for(let u=0;u<g.length;u++)yield{line:g[u],index:u}}const s=[];let t=null,d=[];const e=i(r);for(const{line:c,index:g}of e){d.push(c),d.length>10&&d.shift();const u=n.filter(S=>c.includes(S));u.length>0?(t?(t.keywords.push(...u),t.endLine=Math.min(g+10,t.startLine+300)):t={startLine:Math.max(0,g-10),endLine:Math.min(g+10),keywords:u,lines:[...d]},t.lines.push(c)):t&&(t.lines.push(c),(g>=t.endLine||t.lines.length>=300)&&(s.push(t),t=null,d=[c]))}return t&&s.push(t),s}const w={defaultLogAnalysis:`作为日志分析专家，日志并按照下面的模板回复：
+`);for(let u=0;u<g.length;u++)yield{line:g[u],index:u}}const s=[];let t=null,d=[];const e=i(r);for(const{line:c,index:g}of e){d.push(c),d.length>10&&d.shift();const u=n.filter(S=>c.includes(S));u.length>0?(t?(t.keywords.push(...u),t.endLine=Math.min(g+10,t.startLine+300)):t={startLine:Math.max(0,g-10),endLine:Math.min(g+10),keywords:u,lines:[...d]},t.lines.push(c)):t&&(t.lines.push(c),(g>=t.endLine||t.lines.length>=300)&&(s.push(t),t=null,d=[c]))}return t&&s.push(t),s}const w={defaultLogAnalysis:`作为日志分析专家,请你分析日志,推测可能出问题的模块,根据提供的owner联系列表,推测出模块的owner和Manager(最多输出3个可能的联系人),并按照下面的模板回复：
 
 1. 概述
 - 日志类型
@@ -324,16 +324,14 @@
 - 问题根源
 - 关联性分析
 - 系统模块定位
-- 根据下面的owner联系列表,推测出模块的owner和Manager
 
 3. 解决方案
 - 修复建议
 - 预防措施
 
+4.可能的owner和Manager
 
-请注意这是模块的联系列表和Manager:
-部门、模块与负责人清单
-
+请注意这是owner联系列表,你需要在owner联系列表中找到可能的联系人:
 Platform (Manager: Victor Wan)
 uboot: Tao Zeng
 bl2: Tao Zeng
@@ -423,7 +421,7 @@ QA (Managers: Xiuyue Zhang, Ping Xiong)
 Amazon: Chen Chen
 OTT: Lingling Yu
 IPC: Nannan Meng
-`,detailedLogAnalysis:`作为日志分析专家，请详细分析以下日志：
+`,detailedLogAnalysis:`作为日志分析专家,请详细分析以下日志：
 
 1. 日志概述
 - 日志类型和格式
