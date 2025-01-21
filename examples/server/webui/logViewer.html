@@ -310,6 +310,16 @@
             text-align: center;
             margin-top: 4px;
         }
+
+        /* 添加重复信息的样式 */
+        .duplicate-info {
+            background-color: #f0f0f0;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+        }
     </style>
 </head>
 
@@ -514,73 +524,127 @@
         }
 
         function updateDisplay() {
-            // 停止当前分析
-            stopAnalysis();
+            const logDisplayElem = document.getElementById('log-display');
+            const keywordListElem = document.getElementById('keyword-list');
+            const filterContainer = document.getElementById('filter-container');
 
+            // 清空显示区域
+            logDisplayElem.innerHTML = '';
             keywordListElem.innerHTML = '';
+            filterContainer.innerHTML = '';
 
-            // 过滤并显示关键字块
-            const visibleBlocks = keywordBlocks.filter(block => {
-                return block.keywords.some(keyword => keywordFilters.get(keyword));
+            // 收集所有关键字
+            const allKeywords = new Set();
+            keywordBlocks.forEach(block => {
+                block.keywords.forEach(keyword => allKeywords.add(keyword));
             });
 
-            visibleBlocks.forEach((block, blockIndex) => {
-                const blockElem = document.createElement('div');
-                blockElem.className = 'keyword-block';
+            // 创建过滤器标签
+            allKeywords.forEach(keyword => {
+                const filterTag = document.createElement('span');
+                filterTag.className = `filter-tag ${keywordFilters.get(keyword) ? 'active' : 'inactive'}`;
+                filterTag.textContent = keyword;
+                filterTag.onclick = () => {
+                    const isActive = keywordFilters.get(keyword);
+                    keywordFilters.set(keyword, !isActive);
+                    filterTag.className = `filter-tag ${!isActive ? 'active' : 'inactive'}`;
+                    updateDisplay();
+                };
+                filterContainer.appendChild(filterTag);
+            });
 
-                const tagsContainer = document.createElement('div');
-                tagsContainer.className = 'keyword-tags';
+            // 使用 Map 来跟踪已显示的日志模式
+            const shownPatterns = new Map();
 
-                // 只显示活跃的关键字标签
-                const activeKeywords = block.keywords.filter(keyword =>
-                    keywordFilters.get(keyword));
-
-                activeKeywords.forEach(keyword => {
-                    const tag = document.createElement('span');
-                    tag.className = 'keyword-tag';
-
-                    const keywordLines = [];
-                    lines.slice(block.startLine, block.endLine + 1).forEach((line, idx) => {
-                        if (line.includes(keyword)) {
-                            keywordLines.push(block.startLine + idx);
+            // 收集所有关键字及其对应的块
+            const keywordMap = new Map();
+            keywordBlocks.forEach(block => {
+                const signature = getBlockSignature(block);
+                if (!shownPatterns.has(signature)) {
+                    shownPatterns.set(signature, block);
+                    block.keywords.forEach(keyword => {
+                        if (!keywordMap.has(keyword)) {
+                            keywordMap.set(keyword, []);
                         }
+                        keywordMap.get(keyword).push(block);
+                    });
+                }
+            });
+
+            // 更新关键字列表
+            keywordMap.forEach((blocks, keyword) => {
+                if (keywordFilters.get(keyword)) {  // 只显示激活的关键字
+                    const keywordBlock = document.createElement('div');
+                    keywordBlock.className = 'keyword-block';
+
+                    const keywordHeader = document.createElement('div');
+                    keywordHeader.className = 'keyword';
+                    keywordHeader.textContent = keyword;
+                    keywordBlock.appendChild(keywordHeader);
+
+                    const tagContainer = document.createElement('div');
+                    tagContainer.className = 'keyword-tags';
+
+                    blocks.forEach(block => {
+                        const tag = document.createElement('span');
+                        tag.className = 'keyword-tag';
+                        tag.textContent = `行 ${block.startLine + 1}`;
+                        if (block.duplicateCount > 1) {
+                            tag.textContent += ` (${block.duplicateCount}次)`;
+                        }
+                        tag.onclick = () => displayBlockContent(block);
+                        tagContainer.appendChild(tag);
                     });
 
-                    tag.innerHTML = `${keyword} <span class="line-info">(${keywordLines.length})</span>`;
-                    tag.onclick = () => {
-                        // 停止当前分析
-                        stopAnalysis();
-
-                        displayBlockContent(block);
-                        document.querySelectorAll('.line-highlight').forEach(el => {
-                            el.classList.remove('line-highlight');
-                        });
-                        setTimeout(() => {
-                            if (keywordLines.length > 0) {
-                                const targetLine = document.getElementById(`line-${keywordLines[0]}`);
-                                if (targetLine) {
-                                    targetLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    targetLine.classList.add('line-highlight');
-                                }
-                            }
-                        }, 100);
-                    };
-                    tagsContainer.appendChild(tag);
-                });
-
-                blockElem.appendChild(tagsContainer);
-                keywordListElem.appendChild(blockElem);
+                    keywordBlock.appendChild(tagContainer);
+                    keywordListElem.appendChild(keywordBlock);
+                }
             });
 
-            // 如果有显示的块，显示第一个块的内容
-            if (visibleBlocks.length > 0) {
-                const firstBlock = keywordListElem.querySelector('.keyword-block');
-                if (firstBlock) {
-                    firstBlock.querySelector('.keyword-tag').click();
+            // 显示日志块（只显示每种模式的第一个实例）
+            shownPatterns.forEach(block => {
+                if (block.keywords.some(keyword => keywordFilters.get(keyword))) {
+                    const blockElem = document.createElement('div');
+                    blockElem.className = 'log-block';
+
+                    // 如果有重复，显示重复次数
+                    if (block.duplicateCount > 1) {
+                        const duplicateInfo = document.createElement('div');
+                        duplicateInfo.className = 'duplicate-info';
+                        duplicateInfo.textContent = `此日志模式重复出现 ${block.duplicateCount} 次`;
+                        blockElem.appendChild(duplicateInfo);
+                    }
+
+                    const logContent = document.createElement('pre');
+                    logContent.textContent = block.lines.join('\n');
+                    blockElem.appendChild(logContent);
+                    logDisplayElem.appendChild(blockElem);
                 }
-            } else {
-                logDisplayElem.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No matching log blocks</div>';
-            }
+            });
+        }
+
+        // 修改获取日志块特征的函数，使其更严格
+        function getBlockSignature(block) {
+            // 获取所有行的内容，移除时间戳和数字等可变信息
+            const normalizedLines = block.lines.map(line => {
+                return line
+                    // 移除时间戳
+                    .replace(/\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}.\d+\]/g, '')
+                    // 移除具体数字（保留数字前后的内容）
+                    .replace(/\d+\.\d+/g, 'X.X')
+                    .replace(/\[\d+\]/g, '[X]')
+                    // 移除进程ID等
+                    .replace(/pid:\d+/g, 'pid:X')
+                    // 移除内存地址
+                    .replace(/0x[0-9a-fA-F]+/g, '0xX')
+                    // 移除其他数字
+                    .replace(/\b\d+\b/g, 'X')
+                    // 移除多余空格
+                    .trim()
+                    .replace(/\s+/g, ' ');
+            }).join('\n');
+
+            return normalizedLines;
         }
 
         // 确保 DOM 加载完成后绑定事件
