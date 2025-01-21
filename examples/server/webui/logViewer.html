@@ -653,6 +653,9 @@
             if (analyzeBtn) {
                 analyzeBtn.addEventListener('click', analyzeLog);
             }
+
+            // 初始化 resizer
+            initResizer();
         });
 
         // 确保 analyzeLog 函数被正确定义
@@ -726,7 +729,7 @@
             analysisResultElem.innerHTML = '';
         }
 
-        // 添加拖动功能
+        // 优化 initResizer 函数
         function initResizer() {
             const resizer = document.querySelector('.resizer');
             const logDisplay = document.getElementById('log-display');
@@ -734,7 +737,8 @@
             const container = document.querySelector('.split-container');
 
             let startY;
-            let startHeight;
+            let startLogHeight;
+            let startAnalysisHeight;
 
             // 创建遮罩层
             const overlay = document.createElement('div');
@@ -743,23 +747,33 @@
 
             function startResize(e) {
                 startY = e.clientY;
-                startHeight = analysisResult.offsetHeight;
+                startLogHeight = logDisplay.offsetHeight;
+                startAnalysisHeight = analysisResult.offsetHeight;
                 overlay.style.display = 'block';
                 document.addEventListener('mousemove', resize);
                 document.addEventListener('mouseup', stopResize);
+                resizer.style.cursor = 'row-resize';
             }
 
             function resize(e) {
-                const deltaY = startY - e.clientY;
-                const newHeight = Math.max(100, Math.min(startHeight + deltaY,
-                    container.offsetHeight - 100));
-                analysisResult.style.height = newHeight + 'px';
+                const deltaY = e.clientY - startY;
+
+                // 计算新的高度，确保两个面板都保持最小高度 100px
+                const containerHeight = container.offsetHeight - resizer.offsetHeight;
+                const newLogHeight = Math.max(100, Math.min(startLogHeight + deltaY, containerHeight - 100));
+                const newAnalysisHeight = containerHeight - newLogHeight;
+
+                if (newLogHeight >= 100 && newAnalysisHeight >= 100) {
+                    logDisplay.style.height = `${newLogHeight}px`;
+                    analysisResult.style.height = `${newAnalysisHeight}px`;
+                }
             }
 
             function stopResize() {
                 overlay.style.display = 'none';
                 document.removeEventListener('mousemove', resize);
                 document.removeEventListener('mouseup', stopResize);
+                resizer.style.cursor = 'row-resize';
             }
 
             resizer.addEventListener('mousedown', startResize);

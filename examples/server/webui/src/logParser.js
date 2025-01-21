@@ -183,7 +183,11 @@ export function parseLogFile(logContent) {
     const lineNumbers = Array.from(block.lineNumbers);
     lineNumbers.sort((a, b) => a - b);
     block.summary = `此日志模式重复出现了 ${block.duplicateCount} 次`;
-    block.summaryLine = `行 ${lineNumbers.join('、')}: ${block.summaryLine}`;
+    block.summaryLine = `<div class="log-line">行 ${lineNumbers.join('、')}: ${block.summaryLine}</div>`;
+    
+    block.lines = block.lines.map(line => 
+        `<div class="log-line">${line}</div>`
+    );
   }
 
   return finalBlocks;
