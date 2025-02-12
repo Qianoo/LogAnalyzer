@@ -13,100 +13,95 @@ defaultLogAnalysis: `作为日志分析专家,请你分析日志,推测可能出
 
 3. 解决方案
 - 修复建议
-- 预防措施
 
-4.可能的owner和Manager
+4.可能的Owner和Manager
 
 请注意这是owner联系列表,你需要在owner联系列表中找到可能的联系人:
-Platform (Manager: Victor Wan)
-uboot: Tao Zeng
-bl2: Tao Zeng
-bl31: Tao Zeng
-kernel: Jianxin Pan
-bl30: Qiufang Dai
-Storage drivers: Yonghui Yu
-gpio: Qianggui Song
-pinctrl: Qianggui Song
-i2c: Jian Hu
-clk tree: Jian Hu
-spi: Sunny Luo
-spi nand: Sunny Luo
-spi nor flash: Sunny Luo
-pwm: Bichao Zheng
-emmc: Long Yu
-sdio: Liang Yang
-WIFI/BT: Larson Jiang
-wifi driver: Rongjun Chen
-wifi driver (freertos): Bo Li
-wifi driver (buildroot): Jiabin Chen
-bt driver: Qiu Zeng
-secureos: Peifu Jiang, Pengguang Zhu, Rui Guo
-freertos: Jianxiong Pan
-usb: Yue Wang
-ethernet phy: Zhuo Wang
-uart: Qi Duan, Yu Tu
-Audio (Manager: Jian Xu)
-audio driver: Shuai Li
-audio hal: Shuai Li
-dsp driver: Jiebin Chen
-audio eq/drc: Zhe Wang
-dolby/dts MS12: Yujie Wu
+Platform (Manager: Ethan Wells)
+uboot: Liam Scott
+bl2: Liam Scott
+bl31: Liam Scott
+kernel: Noah Peterson
+bl30: Caleb Dawson
+Storage drivers: Oliver Hayes
+gpio: Henry Sutton
+pinctrl: Henry Sutton
+i2c: Nathan Cole
+clk tree: Nathan Cole
+spi: Lucas Fisher
+spi nand: Lucas Fisher
+spi nor flash: Lucas Fisher
+pwm: Adrian Tucker
+emmc: Logan Reed
+sdio: Mason Bennett
+WIFI/BT: Connor Jennings
+wifi driver: Ryan Mitchell
+wifi driver (freertos): Brandon Lee
+wifi driver (buildroot): Dylan Carter
+bt driver: Owen Greene
+secureos: Wesley Bryant, Blake Thornton, Joel Graham
+freertos: Vincent Harper
+usb: Austin Brooks
+ethernet phy: Evan Wallace
+uart: Tyler Newton, Alex Morris
 
-Display / Graphic (Manager: Simon Zheng)
-OSD: Brain Zhu
-camera ISP: Xiaoxin Cao
-Graphic: Sky Zhou
-buildroot DRM: Ao Xu
-NPU driver: Xingwei Zhou
-NPU APP: Deng Liu
-OSD driver: Pengcheng Chen
-GE2D/GDC: Jian Cao
-PIP: Jintao Xu
-ISP driver: Junwei Ma, Jiacheng Mei, Keke Li
-camera hal: Dong Wei
-camera IQ: Yu Zhang
+Audio (Manager: Julian Adams)
+audio driver: Daniel Lawson
+audio hal: Daniel Lawson
+dsp driver: Justin Cooper
+audio eq/drc: Sean Wright
+dolby/dts MS12: Zachary Foster
 
-HDMI (Manager: Frank Zhao)
-Panel Cvbs: Evoke Zhang
-HDMI TX: Zongdong Jiao
-HDMI RX: Lei Yang, Yicheng Shen
-Media (Manager: Zhi Zhou)
-decoder: Hui Zhang
-Android player: Lifeng Cao
-DRM player: Shipeng Sun, Tao Guo
+Display / Graphic (Manager: Simon Grant)
+OSD: Brian Porter
+camera ISP: Leo Benson
+Graphic: Jack Anderson
+buildroot DRM: Aaron Price
+NPU driver: Xavier Vaughn
+NPU APP: Derek Sullivan
+OSD driver: Patrick Newman
+GE2D/GDC: Ian Chambers
+PIP: Marcus Elliott
+ISP driver: Wesley Clarke, Chase Hughes, Caleb Perkins
+camera hal: Vincent Curtis
+camera IQ: Ethan Greene
 
-Android AE (Manager: Tellen Yu)
-TV framework: Kieth Liu
-CEC: An Xi
-camera apk: Jie Yuan
-Android System: Shuide Chen
-Android 公版 (Manager: Tao Dong)
-OTT release: Gongwei Chen
-TV release: Lei Qian
-DS release: Chunlong Cao
-system control: Kaifu Hu
-burning tools: Yihui Wu
-OTA: Zhigang Yu
+HDMI (Manager: Frank Dawson)
+Panel Cvbs: Oliver Stone
+HDMI TX: Eric Lawson
+HDMI RX: Levi Baldwin, Nathan Spencer
 
-Buildroot (Manager: Guofeng Tang)
-RDK: Jun Zhang, Daogao Xu
-IPC SDK: Hengrui Li, Zhengyu Gao, Xuequan Feng, Yongbin He, Qiang Wei
-ISP/encoder SDK: Yang Su
-HW (Manager: Kun Zhang)
-DDR SW: Jiaxin Ye, Zhiguang Ouyang
-IPC HW: Chuanting Xu
-IPC/OTT HW: Yuanyuan Li
-FAE HW: Linlin Cao
-TV HW: Siwei Chen
-HW: Jie Feng
+Media (Manager: Zachary Miller)
+decoder: Hugo Brooks
+Android player: Maxwell Grant
+DRM player: Spencer Holland, Tristan Coleman
 
-IT
-服务器: Jia Wang, Rocky Duan
-设备: Jianjun Xi, Penghui Wang
-QA (Managers: Xiuyue Zhang, Ping Xiong)
-Amazon: Chen Chen
-OTT: Lingling Yu
-IPC: Nannan Meng
+Android AE (Manager: Taylor Young)
+TV framework: Keith Simmons
+CEC: Andrew Ford
+camera apk: Jesse Duncan
+Android System: Miles Parker
+
+Android 公版 (Manager: Thomas Quinn)
+OTT release: Wyatt Henderson
+TV release: Levi Hunter
+DS release: Felix Norton
+system control: Oscar Bennett
+burning tools: Gregory Hayes
+OTA: Jordan Ellis
+
+Buildroot (Manager: George Franklin)
+RDK: Sebastian Reeves, Damian Walsh
+IPC SDK: Jared Dawson, Ethan Hawkins, Russell Chapman, Bryce Sullivan, Connor Woods
+ISP/encoder SDK: Preston Newman
+
+HW (Manager: Lucas Freeman)
+DDR SW: Jeremy Rhodes, Desmond Garrett
+IPC HW: Cameron Tate
+IPC/OTT HW: Dylan Perry
+FAE HW: Adrian Foster
+TV HW: Ivan Stevenson
+HW: Wesley Norton
 `
 ,
 
@@ -123,7 +118,6 @@ detailedLogAnalysis: `作为日志分析专家,请详细分析以下日志：
 - 错误模式识别
 - 异常事件时序
 - 系统状态分析
-- 性能指标评估
 
 3. 根因分析
 - 直接原因

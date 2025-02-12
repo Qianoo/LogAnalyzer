@@ -322,9 +322,66 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        .select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .control-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            /* 控制按钮之间的间距 */
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .select {
+            min-width: 120px;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .btn-primary:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
     </style>
-  <script type="module" crossorigin>(function(){const d=document.createElement("link").relList;if(d&&d.supports&&d.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))g(o);new MutationObserver(o=>{for(const i of o)if(i.type==="childList")for(const n of i.addedNodes)n.tagName==="LINK"&&n.rel==="modulepreload"&&g(n)}).observe(document,{childList:!0,subtree:!0});function l(o){const i={};return o.integrity&&(i.integrity=o.integrity),o.referrerPolicy&&(i.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?i.credentials="include":o.crossOrigin==="anonymous"?i.credentials="omit":i.credentials="same-origin",i}function g(o){if(o.ep)return;o.ep=!0;const i=l(o);fetch(o.href,i)}})();function R(s){const o=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],i=new Map;for(const e of o)i.set(e,{regex:new RegExp(`\\b${e}\\b`),length:e.length});const n=new Set,a=new Map,c=s.split(`
-`),t=c.length,u=new Array(30);let p=0,r=null,E=-1;function S(e){for(const[m,{regex:f,length:h}]of i)if(e.length>=h&&e.includes(m)&&f.test(e))return{keyword:m,matchedText:m};return null}function H(e,m){const f=e.indexOf(m);if(f===-1)return null;let h=f;for(;h>0&&e[h-1]!==" ";)h--;let L=f+m.length;for(;L<e.length&&e[L]!==" ";)L++;return{before:e.slice(h,f),after:e.slice(f+m.length,L)}}function O(e,m){const f=c[e];return`${e}-${m}-${f}`}for(let e=0;e<t;e++){const m=c[e];if(n.has(e))continue;u[p%u.length]=m,p++;const f=S(m);if(f){const{keyword:h,matchedText:L}=f;if(e===E+1){E=e,r&&(r.lines.push(m),n.add(e));continue}if(!H(m,L))continue;E=e;const k=O(e,Math.min(e+10,t));let w=a.get(k);if(w){w.lineNumbers.add(e),w.duplicateCount++,n.add(e);continue}const b=new Array(Math.min(300,11));let N=0;for(let v=Math.max(0,p-20);v<p;v++)b[N++]=u[v%u.length];w={startLine:Math.max(0,e-20),endLine:Math.min(e+10,t),keywords:[h],lines:b.slice(0,N),duplicateCount:1,lineNumbers:new Set([e]),summaryLine:m},a.set(k,w),r?e>r.endLine||r.lines.length>=300?r=w:(r.keywords.push(h),r.lines.push(m),r.lineNumbers.add(e)):r=w,n.add(e)}else r&&r.lines.length<300&&(r.lines.push(m),e>=r.endLine&&(r=null,p=0,E=-1))}const x=Array.from(a.values());for(const e of x){const m=Array.from(e.lineNumbers);m.sort((f,h)=>f-h),e.summary=`此日志模式重复出现了 ${e.duplicateCount} 次`,e.summaryLine=`<div class="log-line">行 ${m.join("、")}: ${e.summaryLine}</div>`,e.lines=e.lines.map(f=>`<div class="log-line">${f}</div>`)}return x}const M={defaultLogAnalysis:`作为日志分析专家,请你分析日志,推测可能出问题的模块,根据提供的owner联系列表,推测出模块的owner和Manager(最多输出3个可能的联系人),并按照下面的模板回复：
+  <script type="module" crossorigin>(function(){const c=document.createElement("link").relList;if(c&&c.supports&&c.supports("modulepreload"))return;for(const o of document.querySelectorAll('link[rel="modulepreload"]'))m(o);new MutationObserver(o=>{for(const s of o)if(s.type==="childList")for(const n of s.addedNodes)n.tagName==="LINK"&&n.rel==="modulepreload"&&m(n)}).observe(document,{childList:!0,subtree:!0});function d(o){const s={};return o.integrity&&(s.integrity=o.integrity),o.referrerPolicy&&(s.referrerPolicy=o.referrerPolicy),o.crossOrigin==="use-credentials"?s.credentials="include":o.crossOrigin==="anonymous"?s.credentials="omit":s.credentials="same-origin",s}function m(o){if(o.ep)return;o.ep=!0;const s=d(o);fetch(o.href,s)}})();function _(i){const o=["Segmentation fault","core dumped","Bus error","undefined reference","stack overflow","double free","invalid pointer","malloc failed","SIGABRT","SIGSEGV","NullPointerException","ArrayIndexOutOfBoundsException","ClassNotFoundException","NoSuchMethodError","IllegalArgumentException","OutOfMemoryError","StackOverflowError","ClassCastException","ANR","FATAL EXCEPTION","ActivityManager: Force finishing activity","E/AndroidRuntime","W/ActivityThread","StrictMode","kernel panic","Oops","BUG:","Call Trace","slab corruption","general protection fault","I/O error","bad page state","Error","error","Critical","Failed","Exception","Timeout","Permission denied","Device not found"],s=new Map;for(const e of o)s.set(e,{regex:new RegExp(`\\b${e}\\b`),length:e.length});const n=new Set,r=new Map,l=i.split(`
+`),t=l.length,p=new Array(15);let g=0,a=null,h=-1;function C(e){for(const[u,{regex:y,length:f}]of s)if(e.length>=f&&e.includes(u)&&y.test(e))return{keyword:u,matchedText:u};return null}function B(e,u){const y=e.indexOf(u);if(y===-1)return null;let f=y;for(;f>0&&e[f-1]!==" ";)f--;let v=y+u.length;for(;v<e.length&&e[v]!==" ";)v++;return{before:e.slice(f,y),after:e.slice(y+u.length,v)}}function N(e,u){const y=l[e];return`${e}-${u}-${y}`}for(let e=0;e<t;e++){const u=l[e];if(n.has(e))continue;p[g%p.length]=u,g++;const y=C(u);if(y){const{keyword:f,matchedText:v}=y;if(e===h+1){h=e,a&&(a.lines.push(u),n.add(e));continue}if(!B(u,v))continue;h=e;const S=N(e,Math.min(e+5,t));let E=r.get(S);if(E){E.lineNumbers.add(e),E.duplicateCount++,n.add(e);continue}const b=new Array(Math.min(300,6));let A=0;for(let T=Math.max(0,g-10);T<g;T++)b[A++]=p[T%p.length];E={startLine:Math.max(0,e-10),endLine:Math.min(e+5,t),keywords:[f],lines:b.slice(0,A),duplicateCount:1,lineNumbers:new Set([e]),summaryLine:u},r.set(S,E),a?e>a.endLine||a.lines.length>=300?a=E:(a.keywords.push(f),a.lines.push(u),a.lineNumbers.add(e)):a=E,n.add(e)}else a&&a.lines.length<300&&(a.lines.push(u),e>=a.endLine&&(a=null,g=0,h=-1))}const x=Array.from(r.values());for(const e of x){const u=Array.from(e.lineNumbers);u.sort((y,f)=>y-f),e.summary=`此日志模式重复出现了 ${e.duplicateCount} 次`,e.summaryLine=`<div class="log-line">行 ${u.join("、")}: ${e.summaryLine}</div>`,e.lines=e.lines.map(y=>`<div class="log-line">${y}</div>`)}return x}const P={defaultLogAnalysis:`作为日志分析专家,请你分析日志,推测可能出问题的模块,根据提供的owner联系列表,推测出模块的owner和Manager(最多输出3个可能的联系人),并按照下面的模板回复：
 
 1. 概述
 - 日志类型
@@ -337,100 +394,95 @@
 
 3. 解决方案
 - 修复建议
-- 预防措施
 
-4.可能的owner和Manager
+4.可能的Owner和Manager
 
 请注意这是owner联系列表,你需要在owner联系列表中找到可能的联系人:
-Platform (Manager: Victor Wan)
-uboot: Tao Zeng
-bl2: Tao Zeng
-bl31: Tao Zeng
-kernel: Jianxin Pan
-bl30: Qiufang Dai
-Storage drivers: Yonghui Yu
-gpio: Qianggui Song
-pinctrl: Qianggui Song
-i2c: Jian Hu
-clk tree: Jian Hu
-spi: Sunny Luo
-spi nand: Sunny Luo
-spi nor flash: Sunny Luo
-pwm: Bichao Zheng
-emmc: Long Yu
-sdio: Liang Yang
-WIFI/BT: Larson Jiang
-wifi driver: Rongjun Chen
-wifi driver (freertos): Bo Li
-wifi driver (buildroot): Jiabin Chen
-bt driver: Qiu Zeng
-secureos: Peifu Jiang, Pengguang Zhu, Rui Guo
-freertos: Jianxiong Pan
-usb: Yue Wang
-ethernet phy: Zhuo Wang
-uart: Qi Duan, Yu Tu
-Audio (Manager: Jian Xu)
-audio driver: Shuai Li
-audio hal: Shuai Li
-dsp driver: Jiebin Chen
-audio eq/drc: Zhe Wang
-dolby/dts MS12: Yujie Wu
+Platform (Manager: Ethan Wells)
+uboot: Liam Scott
+bl2: Liam Scott
+bl31: Liam Scott
+kernel: Noah Peterson
+bl30: Caleb Dawson
+Storage drivers: Oliver Hayes
+gpio: Henry Sutton
+pinctrl: Henry Sutton
+i2c: Nathan Cole
+clk tree: Nathan Cole
+spi: Lucas Fisher
+spi nand: Lucas Fisher
+spi nor flash: Lucas Fisher
+pwm: Adrian Tucker
+emmc: Logan Reed
+sdio: Mason Bennett
+WIFI/BT: Connor Jennings
+wifi driver: Ryan Mitchell
+wifi driver (freertos): Brandon Lee
+wifi driver (buildroot): Dylan Carter
+bt driver: Owen Greene
+secureos: Wesley Bryant, Blake Thornton, Joel Graham
+freertos: Vincent Harper
+usb: Austin Brooks
+ethernet phy: Evan Wallace
+uart: Tyler Newton, Alex Morris
 
-Display / Graphic (Manager: Simon Zheng)
-OSD: Brain Zhu
-camera ISP: Xiaoxin Cao
-Graphic: Sky Zhou
-buildroot DRM: Ao Xu
-NPU driver: Xingwei Zhou
-NPU APP: Deng Liu
-OSD driver: Pengcheng Chen
-GE2D/GDC: Jian Cao
-PIP: Jintao Xu
-ISP driver: Junwei Ma, Jiacheng Mei, Keke Li
-camera hal: Dong Wei
-camera IQ: Yu Zhang
+Audio (Manager: Julian Adams)
+audio driver: Daniel Lawson
+audio hal: Daniel Lawson
+dsp driver: Justin Cooper
+audio eq/drc: Sean Wright
+dolby/dts MS12: Zachary Foster
 
-HDMI (Manager: Frank Zhao)
-Panel Cvbs: Evoke Zhang
-HDMI TX: Zongdong Jiao
-HDMI RX: Lei Yang, Yicheng Shen
-Media (Manager: Zhi Zhou)
-decoder: Hui Zhang
-Android player: Lifeng Cao
-DRM player: Shipeng Sun, Tao Guo
+Display / Graphic (Manager: Simon Grant)
+OSD: Brian Porter
+camera ISP: Leo Benson
+Graphic: Jack Anderson
+buildroot DRM: Aaron Price
+NPU driver: Xavier Vaughn
+NPU APP: Derek Sullivan
+OSD driver: Patrick Newman
+GE2D/GDC: Ian Chambers
+PIP: Marcus Elliott
+ISP driver: Wesley Clarke, Chase Hughes, Caleb Perkins
+camera hal: Vincent Curtis
+camera IQ: Ethan Greene
 
-Android AE (Manager: Tellen Yu)
-TV framework: Kieth Liu
-CEC: An Xi
-camera apk: Jie Yuan
-Android System: Shuide Chen
-Android 公版 (Manager: Tao Dong)
-OTT release: Gongwei Chen
-TV release: Lei Qian
-DS release: Chunlong Cao
-system control: Kaifu Hu
-burning tools: Yihui Wu
-OTA: Zhigang Yu
+HDMI (Manager: Frank Dawson)
+Panel Cvbs: Oliver Stone
+HDMI TX: Eric Lawson
+HDMI RX: Levi Baldwin, Nathan Spencer
 
-Buildroot (Manager: Guofeng Tang)
-RDK: Jun Zhang, Daogao Xu
-IPC SDK: Hengrui Li, Zhengyu Gao, Xuequan Feng, Yongbin He, Qiang Wei
-ISP/encoder SDK: Yang Su
-HW (Manager: Kun Zhang)
-DDR SW: Jiaxin Ye, Zhiguang Ouyang
-IPC HW: Chuanting Xu
-IPC/OTT HW: Yuanyuan Li
-FAE HW: Linlin Cao
-TV HW: Siwei Chen
-HW: Jie Feng
+Media (Manager: Zachary Miller)
+decoder: Hugo Brooks
+Android player: Maxwell Grant
+DRM player: Spencer Holland, Tristan Coleman
 
-IT
-服务器: Jia Wang, Rocky Duan
-设备: Jianjun Xi, Penghui Wang
-QA (Managers: Xiuyue Zhang, Ping Xiong)
-Amazon: Chen Chen
-OTT: Lingling Yu
-IPC: Nannan Meng
+Android AE (Manager: Taylor Young)
+TV framework: Keith Simmons
+CEC: Andrew Ford
+camera apk: Jesse Duncan
+Android System: Miles Parker
+
+Android 公版 (Manager: Thomas Quinn)
+OTT release: Wyatt Henderson
+TV release: Levi Hunter
+DS release: Felix Norton
+system control: Oscar Bennett
+burning tools: Gregory Hayes
+OTA: Jordan Ellis
+
+Buildroot (Manager: George Franklin)
+RDK: Sebastian Reeves, Damian Walsh
+IPC SDK: Jared Dawson, Ethan Hawkins, Russell Chapman, Bryce Sullivan, Connor Woods
+ISP/encoder SDK: Preston Newman
+
+HW (Manager: Lucas Freeman)
+DDR SW: Jeremy Rhodes, Desmond Garrett
+IPC HW: Cameron Tate
+IPC/OTT HW: Dylan Perry
+FAE HW: Adrian Foster
+TV HW: Ivan Stevenson
+HW: Wesley Norton
 `,detailedLogAnalysis:`作为日志分析专家,请详细分析以下日志：
 
 1. 日志概述
@@ -443,7 +495,6 @@ IPC: Nannan Meng
 - 错误模式识别
 - 异常事件时序
 - 系统状态分析
-- 性能指标评估
 
 3. 根因分析
 - 直接原因
@@ -458,13 +509,19 @@ IPC: Nannan Meng
 - 预防措施`,simpleLogAnalysis:`简要分析此日志：
 1. 问题描述
 2. 原因分析
-3. 解决方案`};function D(s="defaultLogAnalysis"){return`${M.owner_prompt}
+3. 解决方案`};function z(i="defaultLogAnalysis"){return`${P.owner_prompt}
 
-${M[s]}`}async function F(){try{const d=await(await fetch("/config/custom-prompts.json")).json();Object.assign(M,d)}catch(s){console.warn("Failed to load custom prompts:",s)}}F();let C=[],I=[],y=new Map,B=null;const P=document.getElementById("filter-container"),$=document.getElementById("keyword-list"),T=document.getElementById("log-display"),_=window.markdownit({html:!0,linkify:!0,typographer:!0});window.addEventListener("message",async s=>{const d=document.getElementById("progress-container"),l=document.getElementById("progress-bar"),g=document.getElementById("progress-text");d.style.display="block",l.style.width="0%",g.textContent="正在解析日志文件...",await new Promise(o=>requestAnimationFrame(o));try{await new Promise(t=>setTimeout(t,0));const o=s.data;I=o.split(`
-`);const i=I.length;g.textContent="正在解析日志内容...",C=await new Promise(t=>{setTimeout(()=>{const u=R(o);l.style.width="30%",t(u)},0)}),g.textContent="正在处理关键字...",await new Promise(t=>setTimeout(t,0));const n=new Set;for(let t=0;t<C.length;t++){C[t].keywords.forEach(r=>n.add(r));const p=Math.round(30+t/C.length*30);l.style.width=`${p}%`,t%10===0&&await new Promise(r=>setTimeout(r,0))}g.textContent="正在更新界面...",l.style.width="60%",await new Promise(t=>setTimeout(t,0)),P.innerHTML="",$.innerHTML="",y=new Map,n.forEach(t=>y.set(t,!0));let a=0;const c=n.size;for(const t of n){const u=document.createElement("span");u.className="filter-tag active",u.textContent=t,u.onclick=()=>{const r=y.get(t);y.set(t,!r),u.className=`filter-tag ${r?"inactive":"active"}`,A()},P.appendChild(u),a++;const p=Math.round(60+a/c*20);l.style.width=`${p}%`,a%5===0&&await new Promise(r=>setTimeout(r,0))}g.textContent="正在渲染内容...",l.style.width="80%",await new Promise(t=>setTimeout(t,0)),A(),l.style.width="100%",g.textContent="处理完成",setTimeout(()=>{d.style.display="none"},1e3)}catch(o){console.error("Error processing log:",o),g.textContent="处理出错: "+o.message,l.style.backgroundColor="#ff4444",setTimeout(()=>{d.style.display="none"},3e3)}});function X(s){T.innerHTML="";const d=document.createElement("div");d.className="block-header";const l=s.endLine-s.startLine+1,g=l>=500?" (Truncated to 500 lines)":"";if(d.textContent=`Log Block (Lines ${s.startLine+1} - ${s.endLine+1})${g}`,T.appendChild(d),I.slice(s.startLine,s.endLine+1).forEach((i,n)=>{const a=document.createElement("div"),c=s.startLine+n;a.id=`line-${c}`,a.innerHTML=`<span class="line-number">${c+1}</span>${i}`,s.keywords.some(t=>y.get(t)&&i.includes(t))&&a.classList.add("highlight"),T.appendChild(a)}),l>=500){const i=document.createElement("div");i.className="truncate-note",i.style.color="#666",i.style.padding="10px",i.style.fontStyle="italic",i.textContent="Note: Log block has been truncated to 500 lines for better performance.",T.appendChild(i)}}function A(){const s=document.getElementById("log-display"),d=document.getElementById("keyword-list"),l=document.getElementById("filter-container");s.innerHTML="",d.innerHTML="",l.innerHTML="";const g=new Set;C.forEach(n=>{n.keywords.forEach(a=>g.add(a))}),g.forEach(n=>{const a=document.createElement("span");a.className=`filter-tag ${y.get(n)?"active":"inactive"}`,a.textContent=n,a.onclick=()=>{const c=y.get(n);y.set(n,!c),a.className=`filter-tag ${c?"inactive":"active"}`,A()},l.appendChild(a)});const o=new Map,i=new Map;C.forEach(n=>{const a=Z(n);o.has(a)||(o.set(a,n),n.keywords.forEach(c=>{i.has(c)||i.set(c,[]),i.get(c).push(n)}))}),i.forEach((n,a)=>{if(y.get(a)){const c=document.createElement("div");c.className="keyword-block";const t=document.createElement("div");t.className="keyword",t.textContent=a,c.appendChild(t);const u=document.createElement("div");u.className="keyword-tags",n.forEach(p=>{const r=document.createElement("span");r.className="keyword-tag",r.textContent=`行 ${p.startLine+1}`,p.duplicateCount>1&&(r.textContent+=` (${p.duplicateCount}次)`),r.onclick=()=>X(p),u.appendChild(r)}),c.appendChild(u),d.appendChild(c)}}),o.forEach(n=>{if(n.keywords.some(a=>y.get(a))){const a=document.createElement("div");if(a.className="log-block",n.duplicateCount>1){const t=document.createElement("div");t.className="duplicate-info",t.textContent=`此日志模式重复出现 ${n.duplicateCount} 次`,a.appendChild(t)}const c=document.createElement("pre");c.textContent=n.lines.join(`
-`),a.appendChild(c),s.appendChild(a)}})}function Z(s){return s.lines.map(l=>l.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}.\d+\]/g,"").replace(/\d+\.\d+/g,"X.X").replace(/\[\d+\]/g,"[X]").replace(/pid:\d+/g,"pid:X").replace(/0x[0-9a-fA-F]+/g,"0xX").replace(/\b\d+\b/g,"X").trim().replace(/\s+/g," ")).join(`
-`)}document.addEventListener("DOMContentLoaded",()=>{const s=document.getElementById("analyze-btn");s&&s.addEventListener("click",Y),J()});async function Y(){const s=document.getElementById("log-display"),d=document.getElementById("analysis-result"),l=document.getElementById("analyze-btn"),g=s.innerText;l.disabled=!0,l.textContent="分析中...",d.innerHTML='<div class="markdown">正在分析，请等待...</div>',B=new AbortController;try{const o=W("/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[{role:"system",content:D("defaultLogAnalysis")},{role:"user",content:g}],stream:!0}),signal:B.signal});d.innerHTML="";let i="";for await(const n of o){const a=n.choices[0].delta.content;if(a){i+=a;const c=_.render(i);d.innerHTML=`<div class="markdown">${c}</div>`}}}catch(o){console.error("Analysis error:",o),d.innerHTML=`<div class="markdown">分析出错: ${o.message}</div>`}finally{l.disabled=!1,l.textContent="分析日志"}}function J(){const s=document.querySelector(".resizer"),d=document.getElementById("log-display"),l=document.getElementById("analysis-result"),g=document.querySelector(".split-container");let o,i;const n=document.createElement("div");n.className="resize-overlay",document.body.appendChild(n);function a(u){o=u.clientY,i=d.offsetHeight,l.offsetHeight,n.style.display="block",document.addEventListener("mousemove",c),document.addEventListener("mouseup",t),s.style.cursor="row-resize"}function c(u){const p=u.clientY-o,r=g.offsetHeight-s.offsetHeight,E=Math.max(100,Math.min(i+p,r-100)),S=r-E;E>=100&&S>=100&&(d.style.height=`${E}px`,l.style.height=`${S}px`)}function t(){n.style.display="none",document.removeEventListener("mousemove",c),document.removeEventListener("mouseup",t),s.style.cursor="row-resize"}s.addEventListener("mousedown",a)}async function*W(s,d){const l=await fetch(s,d);if(!l.ok)throw new Error(`HTTP error! status: ${l.status}`);const g=l.body.getReader(),o=new TextDecoder;let i="";for(;;){const{value:n,done:a}=await g.read();if(a)break;i+=o.decode(n,{stream:!0});const c=i.split(`
-`);i=c.pop()||"";for(const t of c)if(t.trim()!==""&&t.startsWith("data: ")){const u=t.slice(6);if(u==="[DONE]")return;try{yield JSON.parse(u)}catch(p){console.warn("Failed to parse SSE data:",p)}}}}</script>
+${P[i]}`}async function W(){try{const c=await(await fetch("/config/custom-prompts.json")).json();Object.assign(P,c)}catch(i){console.warn("Failed to load custom prompts:",i)}}W();let M=[],H=[],w=new Map,k=null;const D=document.getElementById("filter-container"),K=document.getElementById("keyword-list"),I=document.getElementById("log-display"),G=window.markdownit({html:!0,linkify:!0,typographer:!0});window.addEventListener("message",async i=>{const c=document.getElementById("progress-container"),d=document.getElementById("progress-bar"),m=document.getElementById("progress-text");c.style.display="block",d.style.width="0%",m.textContent="正在解析日志文件...",await new Promise(o=>requestAnimationFrame(o));try{await new Promise(t=>setTimeout(t,0));const o=i.data;H=o.split(`
+`);const s=H.length;m.textContent="正在解析日志内容...",M=await new Promise(t=>{setTimeout(()=>{const p=_(o);d.style.width="30%",t(p)},0)}),m.textContent="正在处理关键字...",await new Promise(t=>setTimeout(t,0));const n=new Set;for(let t=0;t<M.length;t++){M[t].keywords.forEach(a=>n.add(a));const g=Math.round(30+t/M.length*30);d.style.width=`${g}%`,t%10===0&&await new Promise(a=>setTimeout(a,0))}m.textContent="正在更新界面...",d.style.width="60%",await new Promise(t=>setTimeout(t,0)),D.innerHTML="",K.innerHTML="",w=new Map,n.forEach(t=>w.set(t,!0));let r=0;const l=n.size;for(const t of n){const p=document.createElement("span");p.className="filter-tag active",p.textContent=t,p.onclick=()=>{const a=w.get(t);w.set(t,!a),p.className=`filter-tag ${a?"inactive":"active"}`,O()},D.appendChild(p),r++;const g=Math.round(60+r/l*20);d.style.width=`${g}%`,r%5===0&&await new Promise(a=>setTimeout(a,0))}m.textContent="正在渲染内容...",d.style.width="80%",await new Promise(t=>setTimeout(t,0)),O(),d.style.width="100%",m.textContent="处理完成",setTimeout(()=>{c.style.display="none"},1e3)}catch(o){console.error("Error processing log:",o),m.textContent="处理出错: "+o.message,d.style.backgroundColor="#ff4444",setTimeout(()=>{c.style.display="none"},3e3)}});function X(i){I.innerHTML="";const c=document.createElement("div");c.className="block-header";const d=i.endLine-i.startLine+1,m=d>=500?" (Truncated to 500 lines)":"";if(c.textContent=`Log Block (Lines ${i.startLine+1} - ${i.endLine+1})${m}`,I.appendChild(c),H.slice(i.startLine,i.endLine+1).forEach((s,n)=>{const r=document.createElement("div"),l=i.startLine+n;r.id=`line-${l}`,r.innerHTML=`<span class="line-number">${l+1}</span>${s}`,i.keywords.some(t=>w.get(t)&&s.includes(t))&&r.classList.add("highlight"),I.appendChild(r)}),d>=500){const s=document.createElement("div");s.className="truncate-note",s.style.color="#666",s.style.padding="10px",s.style.fontStyle="italic",s.textContent="Note: Log block has been truncated to 500 lines for better performance.",I.appendChild(s)}}function O(){const i=document.getElementById("log-display"),c=document.getElementById("keyword-list"),d=document.getElementById("filter-container");i.innerHTML="",c.innerHTML="",d.innerHTML="";const m=new Set;M.forEach(n=>{n.keywords.forEach(r=>m.add(r))}),m.forEach(n=>{const r=document.createElement("span");r.className=`filter-tag ${w.get(n)?"active":"inactive"}`,r.textContent=n,r.onclick=()=>{const l=w.get(n);w.set(n,!l),r.className=`filter-tag ${l?"inactive":"active"}`,O()},d.appendChild(r)});const o=new Map,s=new Map;M.forEach(n=>{const r=J(n);o.has(r)||(o.set(r,n),n.keywords.forEach(l=>{s.has(l)||s.set(l,[]),s.get(l).push(n)}))}),s.forEach((n,r)=>{if(w.get(r)){const l=document.createElement("div");l.className="keyword-block";const t=document.createElement("div");t.className="keyword",t.textContent=r,l.appendChild(t);const p=document.createElement("div");p.className="keyword-tags",n.forEach(g=>{const a=document.createElement("span");a.className="keyword-tag",a.textContent=`行 ${g.startLine+1}`,g.duplicateCount>1&&(a.textContent+=` (${g.duplicateCount}次)`),a.onclick=()=>X(g),p.appendChild(a)}),l.appendChild(p),c.appendChild(l)}}),o.forEach(n=>{if(n.keywords.some(r=>w.get(r))){const r=document.createElement("div");if(r.className="log-block",n.duplicateCount>1){const t=document.createElement("div");t.className="duplicate-info",t.textContent=`此日志模式重复出现 ${n.duplicateCount} 次`,r.appendChild(t)}const l=document.createElement("pre");l.textContent=n.lines.join(`
+`),r.appendChild(l),i.appendChild(r)}})}function J(i){return i.lines.map(d=>d.replace(/\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}.\d+\]/g,"").replace(/\d+\.\d+/g,"X.X").replace(/\[\d+\]/g,"[X]").replace(/pid:\d+/g,"pid:X").replace(/0x[0-9a-fA-F]+/g,"0xX").replace(/\b\d+\b/g,"X").trim().replace(/\s+/g," ")).join(`
+`)}document.addEventListener("DOMContentLoaded",()=>{const i=document.getElementById("analyze-btn");i&&i.addEventListener("click",j),q()});async function j(){var n,r,l;const c=document.getElementById("model-selector").value,d=document.getElementById("log-display"),m=document.getElementById("analysis-result"),o=document.getElementById("analyze-btn");k&&k.abort(),k=new AbortController;const s=(n=document.querySelector(".filter-tag.active"))==null?void 0:n.textContent;if(!s){m.innerHTML='<div class="markdown">请先选择一个错误关键字</div>';return}console.log(`开始分析日志，选择的模型: ${c}`),o.disabled=!0,o.textContent="分析中...";try{const t=c==="local"?"http://localhost:8080":"http://localhost:8000",p=c==="local"?"/v1/chat/completions":`/api/analyze-log/${c}`,g=`${t}${p}`,a=z("defaultLogAnalysis"),h=d.innerText.split(`
+`),C=h.findIndex(S=>S.includes(s)),B=Math.max(0,C-10),N=Math.min(h.length,C+10),x=h.slice(B,N),e=`
+                错误关键字: ${s}
+                错误行: ${h[C]}
+                上下文:
+                ${x.join(`
+`)}`;let u;c==="local"?u={messages:[{role:"system",content:a},{role:"user",content:e}],stream:!0}:u={content:e,prompt:a},m.innerHTML='<div class="markdown">正在分析中...</div>';let y="";const f=await fetch(g,{method:"POST",headers:{"Content-Type":"application/json",Accept:"text/event-stream"},body:JSON.stringify(u),signal:k.signal});if(!f.ok)throw new Error(`HTTP error! status: ${f.status}`);const v=f.body.getReader(),$=new TextDecoder;for(;;){const{value:S,done:E}=await v.read();if(E)break;const A=$.decode(S,{stream:!0}).split(`
+`);for(const T of A)if(T.startsWith("data: "))try{const L=JSON.parse(T.slice(5));if(L.error)throw new Error(L.error);if(L.choices&&((l=(r=L.choices[0])==null?void 0:r.delta)!=null&&l.content)){const F=L.choices[0].delta.content;y+=F;const R=G.render(y);m.innerHTML=`<div class="markdown">${R}</div>`}}catch(L){if(L.name!=="SyntaxError")throw console.error("解析响应数据错误:",L),L}}}catch(t){console.error("分析错误:",t),m.innerHTML=`<div class="markdown">分析出错: ${t.message}</div>`}finally{o.disabled=!1,o.textContent="分析日志",k=null}}function q(){const i=document.querySelector(".resizer"),c=document.getElementById("log-display"),d=document.getElementById("analysis-result"),m=document.querySelector(".split-container");let o,s;const n=document.createElement("div");n.className="resize-overlay",document.body.appendChild(n);function r(p){o=p.clientY,s=c.offsetHeight,d.offsetHeight,n.style.display="block",document.addEventListener("mousemove",l),document.addEventListener("mouseup",t),i.style.cursor="row-resize"}function l(p){const g=p.clientY-o,a=m.offsetHeight-i.offsetHeight,h=Math.max(100,Math.min(s+g,a-100)),C=a-h;h>=100&&C>=100&&(c.style.height=`${h}px`,d.style.height=`${C}px`)}function t(){n.style.display="none",document.removeEventListener("mousemove",l),document.removeEventListener("mouseup",t),i.style.cursor="row-resize"}i.addEventListener("mousedown",r)}</script>
 </head>
 
 <body>
@@ -473,13 +530,18 @@ ${M[s]}`}async function F(){try{const d=await(await fetch("/config/custom-prompt
     <div id="container">
         <div id="keyword-list"></div>
         <div class="right-panel">
+            <div class="control-panel">
+                <select id="model-selector" class="select select-bordered">
+                    <option value="local">本地模型</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="deepseek">DeepSeek</option>
+                </select>
+                <button id="analyze-btn" class="btn btn-primary">分析日志</button>
+            </div>
             <div class="split-container">
                 <div id="log-display"></div>
                 <div class="resizer"></div>
                 <div id="analysis-result">Analysis results will be displayed here.</div>
-            </div>
-            <div class="flex justify-end mb-4">
-                <button id="analyze-btn" class="btn btn-primary">分析日志</button>
             </div>
         </div>
     </div>

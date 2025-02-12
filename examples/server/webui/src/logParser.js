@@ -1,7 +1,7 @@
 export function parseLogFile(logContent) {
   const MAX_BLOCK_LINES = 300;      // 设置最大行数限制
-  const LINES_BEFORE_FIRST = 20;    // 第一个关键字前显示的行数
-  const LINES_AFTER_LAST = 10;     // 最后一个关键字后显示的行数
+  const LINES_BEFORE_FIRST = 10;    // 第一个关键字前显示的行数
+  const LINES_AFTER_LAST = 5;     // 最后一个关键字后显示的行数
   const CONTEXT_LENGTH = 30;        // 关键字前后的上下文长度
   
   const keywords = [
