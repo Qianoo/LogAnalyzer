@@ -342,12 +342,8 @@
 
         .control-panel {
             display: flex;
-            align-items: center;
             gap: 10px;
-            /* 控制按钮之间的间距 */
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
         }
 
         .select {
@@ -358,10 +354,11 @@
         }
 
         .btn {
-            padding: 0.5rem 1rem;
-            border: none;
+            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
+            border: none;
         }
 
         .btn-primary {
@@ -369,12 +366,17 @@
             color: white;
         }
 
-        .btn-primary:hover {
-            background-color: #45a049;
+        .btn-error {
+            background-color: #f44336;
+            color: white;
         }
 
-        .btn-primary:disabled {
-            background-color: #cccccc;
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
@@ -457,6 +459,8 @@
                     <option value="deepseek">DeepSeek</option>
                 </select>
                 <button id="analyze-btn" class="btn btn-primary">分析日志</button>
+                <button id="stop-btn" class="btn btn-error" style="display: none;"
+                    onclick="stopAnalysis()">停止分析</button>
             </div>
             <div class="split-container">
                 <div id="log-display"></div>
@@ -819,8 +823,13 @@
         // 确保 DOM 加载完成后绑定事件
         document.addEventListener('DOMContentLoaded', () => {
             const analyzeBtn = document.getElementById('analyze-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
             if (analyzeBtn) {
                 analyzeBtn.addEventListener('click', analyzeLog);
+            }
+            if (stopBtn) {
+                stopBtn.addEventListener('click', stopAnalysis);
             }
 
             // 初始化 resizer
@@ -834,14 +843,13 @@
             const logDisplayElem = document.getElementById('log-display');
             const analysisResultElem = document.getElementById('analysis-result');
             const analyzeBtn = document.getElementById('analyze-btn');
+            const stopBtn = document.getElementById('stop-btn');
 
-            // 初始化 AbortController
             if (currentAnalysisController) {
-                currentAnalysisController.abort(); // 如果存在之前的请求，取消它
+                currentAnalysisController.abort();
             }
             currentAnalysisController = new AbortController();
 
-            // 获取当前选中的错误关键字行及其上下文
             const selectedKeyword = document.querySelector('.filter-tag.active')?.textContent;
             if (!selectedKeyword) {
                 analysisResultElem.innerHTML = '<div class="markdown">请先选择一个错误关键字</div>';
@@ -855,23 +863,9 @@
                 return;
             }
 
-            // 获取上下文（前后5行）
-            const logLines = Array.from(logDisplayElem.children).map(line => line.innerText);
-            const errorLineIndex = logLines.findIndex(line => line === highlightedLine);
-            const contextStart = Math.max(0, errorLineIndex - 5);
-            const contextEnd = Math.min(logLines.length, errorLineIndex + 5);
-            const contextLines = logLines.slice(contextStart, contextEnd);
-
-            // 构建分析内容
-            const contentToAnalyze = `
-            错误关键字: ${selectedKeyword}
-            错误行: ${highlightedLine}
-            上下文:
-            ${contextLines.join('\n')}`;
-
             console.log(`开始分析日志，选择的模型: ${selectedModel}`);
-            analyzeBtn.disabled = true;
-            analyzeBtn.textContent = '分析中...';
+            analyzeBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
 
             try {
                 const baseUrl = selectedModel === 'local' ? 'http://localhost:8080' : 'http://localhost:8000';
@@ -879,27 +873,28 @@
                 const url = `${baseUrl}${endpoint}`;
                 const prompt = getCombinedPrompt('defaultLogAnalysis');
 
-                let requestBody;
-                if (selectedModel === 'local') {
-                    requestBody = {
-                        messages: [
-                            { role: "system", content: prompt },
-                            { role: "user", content: contentToAnalyze }
-                        ],
-                        stream: true
-                    };
-                } else {
-                    requestBody = {
-                        content: contentToAnalyze,
-                        prompt: prompt
-                    };
-                }
+                // 构建分析内容
+                const contentToAnalyze = `
+                错误关键字: ${selectedKeyword}
+                错误行: ${highlightedLine}
+                上下文:
+                ${Array.from(logDisplayElem.children).map(line => line.innerText).join('\n')}`;
 
-                // 清空之前的分析结果
+                const requestBody = selectedModel === 'local' ? {
+                    messages: [
+                        { role: "system", content: prompt },
+                        { role: "user", content: contentToAnalyze }
+                    ],
+                    stream: true
+                } : {
+                    content: contentToAnalyze,
+                    prompt: prompt
+                };
+
                 analysisResultElem.innerHTML = '<div class="markdown">正在分析中...</div>';
                 let currentContent = '';
 
-                const response = await fetch(url, {
+                const options = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -907,51 +902,27 @@
                     },
                     body: JSON.stringify(requestBody),
                     signal: currentAnalysisController.signal
-                });
+                };
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-
-                    const chunk = decoder.decode(value, { stream: true });
-                    const lines = chunk.split('\n');
-
-                    for (const line of lines) {
-                        if (line.startsWith('data: ')) {
-                            try {
-                                const data = JSON.parse(line.slice(5));
-                                if (data.error) {
-                                    throw new Error(data.error);
-                                }
-                                if (data.choices && data.choices[0]?.delta?.content) {
-                                    const addedContent = data.choices[0].delta.content;
-                                    currentContent += addedContent;
-                                    const renderedContent = md.render(currentContent);
-                                    analysisResultElem.innerHTML = `<div class="markdown">${renderedContent}</div>`;
-                                }
-                            } catch (error) {
-                                if (error.name !== 'SyntaxError') {
-                                    console.error('解析响应数据错误:', error);
-                                    throw error;
-                                }
-                            }
-                        }
+                for await (const data of sendSSEPostRequest(url, options)) {
+                    if (data.choices && data.choices[0]?.delta?.content) {
+                        currentContent += data.choices[0].delta.content;
+                        const renderedContent = md.render(currentContent);
+                        analysisResultElem.innerHTML = `<div class="markdown">${renderedContent}</div>`;
                     }
                 }
             } catch (error) {
-                console.error('分析错误:', error);
-                analysisResultElem.innerHTML = `<div class="markdown">分析出错: ${error.message}</div>`;
+                if (error.name === 'AbortError') {
+                    analysisResultElem.innerHTML = '<div class="markdown">分析已停止</div>';
+                } else {
+                    console.error('分析错误:', error);
+                    analysisResultElem.innerHTML = `<div class="markdown">分析出错: ${error.message}</div>`;
+                }
             } finally {
+                stopBtn.style.display = 'none';
+                analyzeBtn.style.display = 'inline-block';
                 analyzeBtn.disabled = false;
-                analyzeBtn.textContent = '分析日志';
-                currentAnalysisController = null; // 清理 controller
+                currentAnalysisController = null;
             }
         }
 
@@ -959,11 +930,16 @@
         function stopAnalysis() {
             if (currentAnalysisController) {
                 currentAnalysisController.abort();
-                currentAnalysisController = null;
             }
             const analyzeBtn = document.getElementById('analyze-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
+            stopBtn.style.display = 'none';
+            analyzeBtn.style.display = 'inline-block';
             analyzeBtn.disabled = false;
-            analyzeBtn.textContent = '分析日志';
+
+            const analysisResultElem = document.getElementById('analysis-result');
+            analysisResultElem.innerHTML = '<div class="markdown">分析已停止</div>';
         }
 
         // 优化 initResizer 函数
