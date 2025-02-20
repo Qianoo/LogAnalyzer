@@ -1,8 +1,10 @@
 [Build]
+cd build
 cmake -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
 cmake --build build --config Release -j6
 
 [npm run dev error]
+cd examples/server/webui
 rm -rf node_modules package-lock.json
 npm install
 npm run dev

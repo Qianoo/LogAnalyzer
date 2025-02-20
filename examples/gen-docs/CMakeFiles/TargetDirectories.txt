@@ -1,7 +1,0 @@
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/llama-gen-docs.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/edit_cache.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/rebuild_cache.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/list_install_components.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/install.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/install/local.dir
-/home/lance/workspace/LLM/llama.cpp/examples/gen-docs/CMakeFiles/install/strip.dir
