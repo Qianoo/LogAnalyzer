@@ -443,6 +443,15 @@
             background-color: #fff3cd;
             border-left: 3px solid #ffc107;
         }
+
+        /* 添加错误处理样式 */
+        .error-message {
+            color: red;
+            padding: 10px;
+            border: 1px solid red;
+            margin: 10px;
+            background-color: #fff3f3;
+        }
     </style>
 </head>
 
@@ -475,6 +484,8 @@
         <div class="progress-bar" id="progress-bar"></div>
         <div class="progress-text" id="progress-text">正在解析日志...</div>
     </div>
+
+    <input type="file" id="file-upload" accept=".txt,.log" style="display: none;" @change="handleFileUpload" />
 
     <script type="module">
         import { parseLogFile } from './src/logParser.js';
@@ -873,6 +884,20 @@
 
             // 初始化 resizer
             initResizer();
+
+            // 尝试从 localStorage 获取日志内容
+            const logContent = localStorage.getItem('pendingLogContent');
+            if (logContent) {
+                // 清除存储的内容
+                localStorage.removeItem('pendingLogContent');
+
+                // 处理日志内容
+                processLogContent(logContent);
+            } else {
+                console.error('No log content found');
+                document.getElementById('log-display').innerHTML =
+                    '<div class="error-message">未能获取到日志内容</div>';
+            }
         });
 
         // 确保 analyzeLog 函数被正确定义
@@ -907,7 +932,9 @@
             stopBtn.style.display = 'inline-block';
 
             try {
-                const baseUrl = selectedModel === 'local' ? 'http://localhost:8080' : 'http://localhost:8000';
+                const baseUrl = selectedModel === 'local'
+                    ? `http://${window.location.hostname}:8080`
+                    : `http://${window.location.hostname}:8000`;
                 const endpoint = selectedModel === 'local' ? '/v1/chat/completions' : `/api/analyze-log/${selectedModel}`;
                 const url = `${baseUrl}${endpoint}`;
                 const prompt = getCombinedPrompt('defaultLogAnalysis');
@@ -1089,6 +1116,30 @@
                         }
                     }
                 }
+            }
+        }
+
+        function processLogContent(content) {
+            try {
+                // 使用现有的解析器解析日志
+                const logBlocks = parseLogFile(content);
+
+                // 显示日志内容
+                const logDisplayElem = document.getElementById('log-display');
+                if (logBlocks && logBlocks.length > 0) {
+                    logDisplayElem.innerHTML = logBlocks
+                        .map(block => block.lines.join('\n'))
+                        .join('\n');
+                } else {
+                    logDisplayElem.innerHTML = '<div class="log-line">未发现错误日志</div>';
+                }
+
+                // 更新关键字列表
+                updateKeywordList(logBlocks);
+            } catch (error) {
+                console.error('Error processing log content:', error);
+                document.getElementById('log-display').innerHTML =
+                    `<div class="error-message">日志处理失败: ${error.message}</div>`;
             }
         }
     </script>

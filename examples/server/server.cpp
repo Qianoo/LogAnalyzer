@@ -30,6 +30,8 @@
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <filesystem>
+#include <fstream>
 
 using json = nlohmann::ordered_json;
 
@@ -4503,6 +4505,64 @@ int main(int argc, char **argv)
     // Save & load slots
     svr->Get("/slots", handle_slots);
     svr->Post("/slots/:id_slot", handle_slots_action);
+
+    // 添加文件上传处理路由
+    svr->Post("/upload", [](const httplib::Request &req, httplib::Response &res)
+              {
+        // 检查是否有文件
+        auto file = req.get_file_value("file");
+
+        // 创建上传目录
+        std::string upload_dir = "uploads";
+        if (!std::filesystem::exists(upload_dir)) {
+            std::filesystem::create_directory(upload_dir);
+        }
+
+        // 生成唯一文件名
+        std::string filename = std::to_string(std::time(nullptr)) + "_" + file.filename;
+        std::string filepath = upload_dir + "/" + filename;
+
+        // 保存文件
+        std::ofstream ofs(filepath, std::ios::binary);
+        if (!ofs) {
+            res.status = 500;
+            res.set_content("{\"error\":\"Failed to save file\"}", "application/json");
+            return;
+        }
+        ofs.write(file.content.c_str(), file.content.size());
+        ofs.close();
+
+        // 返回成功响应
+        res.set_content(
+            "{\"path\":\"" + filename + "\"}",
+            "application/json"
+        ); });
+
+    // 添加文件获取路由
+    svr->Get("/file/(.*)", [](const httplib::Request &req, httplib::Response &res)
+             {
+        std::string filename = req.matches[1];
+        std::string filepath = "uploads/" + filename;
+
+        // 检查文件是否存在
+        if (!std::filesystem::exists(filepath)) {
+            res.status = 404;
+            res.set_content("File not found", "text/plain");
+            return;
+        }
+
+        // 读取文件内容
+        std::ifstream file(filepath, std::ios::binary);
+        if (!file) {
+            res.status = 500;
+            res.set_content("Failed to read file", "text/plain");
+            return;
+        }
+
+        std::string content((std::istreambuf_iterator<char>(file)),
+                            std::istreambuf_iterator<char>());
+
+        res.set_content(content, "text/plain"); });
 
     //
     // Start the server
